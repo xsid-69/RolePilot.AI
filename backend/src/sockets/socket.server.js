@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import userModel from "../models/user.model.js";
 import aiService from "../services/ai.service.js";
 import messageModel from "../models/message.model.js";
+import { createMemory, queryMemory } from "../services/vector.service.js";
 
 function initSocketServer(httpServer){
     const io = new Server(httpServer,{})
@@ -38,35 +39,40 @@ function initSocketServer(httpServer){
         socket.on("ai-message" , async (messagePayload) =>{
             console.log("AI Message Payload :", messagePayload);
 
-            await messageModel.create({
-                chat:messagePayload.chat,
-                user:messagePayload.user,
-                content:messagePayload.content,
-                role:"user"
-            })
-            
-            const chatHistory = await messageModel.find({
-                chat:messagePayload.chat
-            })
-            
-            const response = await aiService.generateAIResponse(chatHistory.map(item=>{
-                return {
-                    role:item.role,
-                    parts:[{text:item.content}]
-                }
-            }));
+            try {
+                await messageModel.create({
+                    chat:messagePayload.chat,
+                    user:messagePayload.user,
+                    content:messagePayload.content,
+                    role:"user"
+                })
+                
+                const chatHistory = (await messageModel.find({
+                    chat:messagePayload.chat
+                }).sort({createdAt:-1}).limit(20).lean()).reverse()
+                
+                const response = await aiService.generateAIResponse(chatHistory.map(item=>{
+                    return {
+                        role:item.role,
+                        parts:[{text:item.content}]
+                    }
+                }));
 
-            await messageModel.create({
-                chat:messagePayload.chat,
-                user:messagePayload.user,
-                content:response,
-                role:"model"
-            })
+                await messageModel.create({
+                    chat:messagePayload.chat,
+                    user:messagePayload.user,
+                    content:response,
+                    role:"model"
+                })
 
-            socket.emit("ai-response",{
-                content:response,
-                chat:messagePayload.chat
-            });
+                socket.emit("ai-response",{
+                    content:response,
+                    chat:messagePayload.chat
+                });
+            } catch (error) {
+                console.error("AI Message Error:", error);
+                socket.emit("ai-error", { error: error?.message || "Something went wrong" });
+            }
         })
     })
 }
