@@ -9,17 +9,41 @@ const ROLES = [
   { id: 'programmer', label: 'Programmer', icon: Code, color: 'text-yellow-400', bgColor: 'bg-yellow-400/10' }
 ];
 
-const ChatInput = () => {
+const ChatInput = ({ onSendMessage, chatStarted }) => {
   const [selectedRole, setSelectedRole] = useState(ROLES[0]);
   const [isRoleOpen, setIsRoleOpen] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const handleSend = () => {
+    if (!message.trim()) return;
+    if (onSendMessage) {
+      onSendMessage(message, selectedRole.id);
+    }
+    setMessage("");
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSend();
+    }
+  };
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 mt-8 absolute bottom-10 left-0 right-0 z-20">
-      <div className="bg-[#1a1d26]/80 backdrop-blur-xl border border-white/5 rounded-3xl p-4 shadow-2xl">
+    <div className={`w-full max-w-3xl mx-auto px-4 absolute left-0 right-0 z-20 transition-all duration-700 ease-in-out ${
+      chatStarted ? "bottom-6" : "top-[80%] -translate-y-1/2"
+    }`}>
+      <div className={`bg-[#1a1d26]/80 backdrop-blur-xl border border-white/5 rounded-3xl shadow-2xl transition-all duration-700 ${
+        chatStarted ? "p-3" : "p-5"
+      }`}>
         <input
           type="text"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder={`Message ${selectedRole.label}...`}
-          className="w-full bg-transparent text-white placeholder-gray-500 outline-none text-lg px-2 pb-12"
+          className={`w-full bg-transparent text-white placeholder-gray-500 outline-none px-2 transition-all duration-700 ${
+            chatStarted ? "text-base pb-2" : "text-lg pb-12"
+          }`}
         />
         
         <div className="flex justify-between items-center mt-2 px-2">
@@ -82,7 +106,10 @@ const ChatInput = () => {
               )}
             </div>
             
-            <button className="bg-white text-black p-2 rounded-lg hover:bg-gray-200 transition-all duration-200 cursor-pointer active:scale-90 shadow-lg shadow-white/5">
+            <button 
+              onClick={handleSend}
+              className="bg-white text-black p-2 rounded-lg hover:bg-gray-200 transition-all duration-200 cursor-pointer active:scale-90 shadow-lg shadow-white/5"
+            >
                <ArrowUp className="w-5 h-5" />
             </button>
           </div>

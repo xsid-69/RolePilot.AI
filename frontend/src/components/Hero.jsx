@@ -46,7 +46,7 @@ const Hero = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-4 mb-15">
-      <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+      <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-8 shadow-[0_0_40px_rgba(255,255,255,0.5)]">
         <Sparkles className="w-8 h-8 text-black fill-black" />
       </div>
       

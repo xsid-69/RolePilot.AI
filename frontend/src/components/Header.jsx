@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { LayoutGrid, Sparkles, User, LogOut, ChevronDown } from 'lucide-react';
+import { MessageSquarePlus, Sparkles, User, LogOut, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUser } from '../context/UserContextShared';
 import { toast } from 'react-toastify';
 
-const Header = () => {
+const Header = ({ onNewChat }) => {
   const { user, logout } = useUser();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -28,6 +28,14 @@ const Header = () => {
       </div>
       
       <div className='flex items-center gap-3'>
+        <button 
+            onClick={onNewChat}
+            className="p-2 text-gray-400 hover:text-white transition-all duration-200 rounded-full hover:bg-white/10 active:scale-95 cursor-pointer"
+            title="New Chat"
+        >
+            <MessageSquarePlus className="w-6 h-6" />
+        </button>
+
         {user ? (
             <div className="relative">
                 <button 
@@ -72,9 +80,7 @@ const Header = () => {
             </Link>
         )}
 
-        <button className="p-2 text-gray-400 hover:text-white transition-all duration-200 rounded-full hover:bg-white/10 active:scale-95 cursor-pointer">
-            <LayoutGrid className="w-6 h-6" />
-        </button>
+        
       </div>
     </header>
   );

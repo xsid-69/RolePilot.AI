@@ -86,13 +86,17 @@ function initSocketServer(httpServer) {
                 const ltmContent = memory.map(item => item.metadata.text).join("\n");
                 
                 // Ab prompt bana rahe hain jisme purani baatein (context) bhi hongi
+                const isNewChat = chatHistory.length <= 1;
+                const ltmInstruction = isNewChat 
+                    ? "These are past memories. As this is a NEW chat session, DO NOT bring them up unless the user specifically references past context or asks about them. Otherwise, ignore them."
+                    : "These are previous messages from the user's history, use them for context.";
+
                  const ltm = [
                     {
                         role: "user",
                         parts: [ {
                             text: `
-    
-                            these are some previous messages from the chat, use them to generate a response
+                            ${ltmInstruction}
     
                             ${ltmContent}
                             
