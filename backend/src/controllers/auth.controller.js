@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 async function registerUser(req,res){
-    const {fullName:{firstName,lastName} , email , password } = req.body;
+    const { firstName, lastName, email, password } = req.body;
 
     const userAlreadyExist = await userModel.findOne({email});
 
@@ -31,6 +31,7 @@ async function registerUser(req,res){
             _id:user._id
         }
     })
+    console.log(user ,"user created");
 }
 
 async function loginUser(req,res){
@@ -57,6 +58,7 @@ async function loginUser(req,res){
          _id:user._id
       }
    })
+   console.log(user ,"user logged in");
 
 }  
 

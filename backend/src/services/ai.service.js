@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai"; 
+
 let ai; // AI instance
 
 async function generateAIResponse(prompt, systemInstruction = null) {
@@ -10,7 +11,11 @@ async function generateAIResponse(prompt, systemInstruction = null) {
 
     const config = {
         model: "gemini-2.5-flash",
-        contents: prompt
+        contents: prompt,
+        config :{
+            tempreture:0.7,
+            systemInstruction:systemInstruction
+        }
     };
     console.log("AI Service: Sending prompt to Gemini:", JSON.stringify(prompt, null, 2)); // CRITICAL DEBUG LOG
 
