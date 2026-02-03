@@ -4,7 +4,7 @@ import connectDB from "./src/db/db.js";
 import initSocketServer from "./src/sockets/socket.server.js";
 import http from "http";
 
-connectDB();
+await connectDB();
 
 const server = http.createServer(app);
 
