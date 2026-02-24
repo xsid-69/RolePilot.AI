@@ -46,11 +46,11 @@ const Hero = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-4 mb-15">
-      <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-8 shadow-[0_0_40px_rgba(255,255,255,0.5)]">
+      <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-8 shadow-[0_0_40px_rgba(255,255,255,0.5)] transition-all duration-700 ease-in-out hover:scale-110 hover:shadow-[0_0_60px_rgba(255,255,255,0.8)] hover:rotate-6 cursor-pointer">
         <Sparkles className="w-8 h-8 text-black fill-black" />
       </div>
       
-      <h1 className="text-4xl md:text-5xl font-medium text-white mb-4 tracking-tight">
+      <h1 className="text-4xl md:text-5xl font-medium text-white mb-4 tracking-tight transition-all duration-700 ease-in-out hover:scale-[1.02] cursor-default hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
         {displayedText.line1}
         {activeLine === 1 && <span className="animate-pulse">|</span>}
         <br />
@@ -60,7 +60,7 @@ const Hero = () => {
         </span>
       </h1>
       
-      <p className="text-gray-500 max-w-lg mt-4 text-sm md:text-base leading-relaxed">
+      <p className="text-gray-500 max-w-lg mt-4 text-sm md:text-base leading-relaxed transition-colors duration-700 ease-in-out hover:text-gray-300">
         Ready to assist you with anything you need?
       </p>
     </div>

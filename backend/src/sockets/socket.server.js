@@ -4,7 +4,9 @@ import jwt from "jsonwebtoken";
 import userModel from "../models/user.model.js";
 import aiService from "../services/ai.service.js";
 import messageModel from "../models/message.model.js";
+import ChatModel from "../models/chat.model.js";
 import { createMemory, queryMemory } from "../services/vector.service.js";
+import promptBuilderService from "../services/promptBuilder.service.js";
 
 function initSocketServer(httpServer) {
     const io = new Server(httpServer, {
@@ -103,8 +105,12 @@ function initSocketServer(httpServer) {
                             ` } ]
                     }
                 ]
+                /*get chat and persona to build system prompt*/
+                const chat = await ChatModel.findById(messagePayload.chat).populate("persona");
+                const systemPrompt = promptBuilderService.buildSystemPrompt(chat?.persona);
+
                 /*generate response from ai*/
-                const response = await aiService.generateAIResponse([...ltm, ...stm]);
+                const response = await aiService.generateAIResponse([...ltm, ...stm], systemPrompt);
 
                 socket.emit('ai-response', {
                     content: response,

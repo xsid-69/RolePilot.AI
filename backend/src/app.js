@@ -5,6 +5,8 @@ import cors from "cors";
 /*Routes*/ 
 import authRoutes from "./routes/auth.routes.js"
 import chatRoutes from "./routes/chat.routes.js"
+import personaRoutes from "./routes/persona.routes.js"
+import errorMiddleware from "./middlewares/error.middleware.js";
 
 const app = express();
 
@@ -18,5 +20,9 @@ app.use(cookieParser());
 
 app.use("/api/auth",authRoutes);
 app.use("/api/chat",chatRoutes);
+app.use("/api/personas",personaRoutes);
+
+// Error handling middleware should be registered last
+app.use(errorMiddleware);
 
 export default app;

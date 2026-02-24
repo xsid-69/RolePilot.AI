@@ -67,7 +67,7 @@ const SignUpPage = () => {
       console.log(response.data);
       login(response.data.user);
       toast.success("User created successfully");
-      navigate("/");
+      navigate("/login");
     } catch (error) {
       console.error(error);
     }

@@ -6,6 +6,11 @@ const chatSchema = new mongoose.Schema({
         ref:"user",
         required:true
     },
+    persona:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"persona",
+        required:true
+    },
     title:{
         type:String,
         required:true

@@ -52,6 +52,16 @@ const Header = ({ onNewChat }) => {
                             <p className="text-xs text-gray-400 truncate">{user.email}</p>
                         </div>
                         <div className="p-1">
+                            <button 
+                                onClick={() => {
+                                    setIsDropdownOpen(false);
+                                    if(window.onManagePersonas) window.onManagePersonas();
+                                }}
+                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 text-left cursor-pointer active:scale-95"
+                            >
+                                <Sparkles size={16} />
+                                Manage Personas
+                            </button>
                             <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 text-left cursor-pointer active:scale-95">
                                 <User size={16} />
                                 View Profile
