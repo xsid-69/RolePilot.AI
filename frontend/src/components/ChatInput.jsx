@@ -112,7 +112,7 @@ const ChatInput = ({ onSendMessage, chatStarted, personas = [], selectedPersona,
                 id='roleselector'
                 onClick={() => setIsRoleOpen(!isRoleOpen)}
                 className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-95 border border-white/5 bg-blue-500/10`}
-                title="Select Persona"
+                title="Select Role"
               >
                 <Sparkles className={`w-4 h-4 md:w-5 md:h-5 text-blue-400`} />
               </button>

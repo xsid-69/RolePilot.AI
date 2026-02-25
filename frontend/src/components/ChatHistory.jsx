@@ -25,19 +25,20 @@ const ChatHistory = ({ chats = [], activeChatId, onSelectChat, onDeleteChat }) =
                                     : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/8 hover:text-gray-200 hover:border-white/20'
                             }`}
                         >
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                                activeChatId === chat._id ? 'bg-blue-500 text-white' : 'bg-white/5 text-gray-500'
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors font-bold ${
+                                activeChatId === chat._id ? 'bg-blue-500 text-white' : 'bg-white/10 text-blue-400'
                             }`}>
-                                <MessageSquare size={20} />
+                                {chat.persona?.name ? chat.persona.name.charAt(0).toUpperCase() : <MessageSquare size={18} />}
                             </div>
                             <div className="flex flex-col min-w-0 pr-10">
                                 <span className="text-sm font-bold truncate block">
                                     {chat.title || "Untitled Chat"}
                                 </span>
-                                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-1 flex items-center gap-2">
-                                    <span className="w-1 h-1 rounded-full bg-blue-500/50" />
+                                <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-1 flex items-center gap-2">
+                                    <span className="text-blue-500/80">{chat.persona?.name || "Persona"}</span>
+                                    <span className="w-1 h-1 rounded-full bg-gray-600" />
                                     {new Date(chat.lastActivity).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                </span>
+                                </div>
                             </div>
                         </button>
                         

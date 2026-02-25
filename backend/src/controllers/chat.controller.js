@@ -46,7 +46,7 @@ async function createChat(req,res){
 
 async function getAllChats(req, res) {
     try {
-        const chats = await ChatModel.find({ user: req.user._id }).sort({ lastActivity: -1 });
+        const chats = await ChatModel.find({ user: req.user._id }).sort({ lastActivity: -1 }).populate("persona");
         return res.status(200).json({
             chats,
             success: true

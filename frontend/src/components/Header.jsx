@@ -25,12 +25,12 @@ const Header = ({ onNewChat, onShowHistory }) => {
           onClick={() => window.location.href = '/'}
           className="group flex items-center gap-2 md:gap-4 cursor-pointer"
         >
-          <div className="w-8 h-8 md:w-10 md:h-10 bg-white rounded-xl md:rounded-2xl flex items-center justify-center transition-all duration-700 group-hover:rotate-15 group-hover:scale-110 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-black fill-black" />
+          <div className="w-8 h-8 md:w-11 md:h-11 bg-white rounded-xl md:rounded-[18px] flex items-center justify-center transition-all duration-700 group-hover:rotate-12 group-hover:scale-110 shadow-[0_0_30px_rgba(255,255,255,0.15)] ring-1 ring-white/20">
+                <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-black fill-black/10" />
           </div>
           <div className="flex flex-col">
-            <span className="text-white font-black text-base md:text-xl tracking-tighter leading-none">ROLEPILOT</span>
-            <span className="text-[8px] md:text-[10px] text-blue-500 font-bold tracking-[0.2em] md:tracking-[0.3em] uppercase opacity-80 mt-0.5 md:mt-1">Studio AI</span>
+            <span className="text-white font-black text-base md:text-2xl tracking-tighter leading-none text-vibrant-gradient">ROLEPILOT</span>
+            <span className="text-[7px] md:text-[9px] text-blue-400 font-black tracking-[0.4em] uppercase opacity-90 mt-1">Studio AI</span>
           </div>
         </div>
         

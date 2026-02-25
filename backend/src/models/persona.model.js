@@ -37,6 +37,16 @@ const personaSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    avatar: {
+        type: String,
+        trim: true,
+        default: ""
+    },
+    background: {
+        type: String,
+        trim: true,
+        default: ""
+    },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",

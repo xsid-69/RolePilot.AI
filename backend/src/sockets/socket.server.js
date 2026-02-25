@@ -51,6 +51,7 @@ function initSocketServer(httpServer) {
                         role: "user"
                     }),
                     aiService.generateVector(messagePayload.content),
+                    ChatModel.findByIdAndUpdate(messagePayload.chat, { lastActivity: new Date() })
                 ]);
 
                 /*query pinecone for previous messages from vector db*/
@@ -107,7 +108,7 @@ function initSocketServer(httpServer) {
                 ]
                 /*get chat and persona to build system prompt*/
                 const chat = await ChatModel.findById(messagePayload.chat).populate("persona");
-                const systemPrompt = promptBuilderService.buildSystemPrompt(chat?.persona);
+                const systemPrompt = promptBuilderService.buildSystemPrompt(chat?.persona, socket.user);
 
                 /*generate response from ai*/
                 const response = await aiService.generateAIResponse([...ltm, ...stm], systemPrompt);
@@ -129,15 +130,18 @@ function initSocketServer(httpServer) {
                 ]);
 
                 /*store response in vector db pinecone*/
-                await createMemory({
-                    vector: responseVectors,
-                    id: responseMessage._id.toString(),
-                    metadata: {
-                        chat: messagePayload.chat.toString(),
-                        user: socket.user._id.toString(),
-                        text: response
-                    }
-                });
+                await Promise.all([
+                    createMemory({
+                        vector: responseVectors,
+                        id: responseMessage._id.toString(),
+                        metadata: {
+                            chat: messagePayload.chat.toString(),
+                            user: socket.user._id.toString(),
+                            text: response
+                        }
+                    }),
+                    ChatModel.findByIdAndUpdate(messagePayload.chat, { lastActivity: new Date() })
+                ]);
             } catch (error) {
                 console.error("AI Message Error:", error);
                 socket.emit("ai-error", { error: error?.message || "Something went wrong" });

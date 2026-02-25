@@ -9,7 +9,9 @@ const PersonaModal = ({ isOpen, onClose, onSave, persona = null }) => {
         personalityTraits: persona?.personalityTraits || [],
         rules: persona?.rules || [],
         visibility: persona?.visibility || 'private',
-        openingMessage: persona?.openingMessage || ''
+        openingMessage: persona?.openingMessage || '',
+        avatar: persona?.avatar || '',
+        background: persona?.background || ''
     });
 
     const [newTrait, setNewTrait] = useState('');
@@ -92,6 +94,26 @@ const PersonaModal = ({ isOpen, onClose, onSave, persona = null }) => {
                                 placeholder="e.g. Consulting Detective"
                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500/50 transition-colors"
                                 required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-400">Avatar URL</label>
+                            <input 
+                                type="text"
+                                value={formData.avatar}
+                                onChange={(e) => setFormData(prev => ({ ...prev, avatar: e.target.value }))}
+                                placeholder="https://unsplash.com/..."
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500/50 transition-colors"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-400">Background Image URL</label>
+                            <input 
+                                type="text"
+                                value={formData.background}
+                                onChange={(e) => setFormData(prev => ({ ...prev, background: e.target.value }))}
+                                placeholder="https://unsplash.com/..."
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500/50 transition-colors"
                             />
                         </div>
                     </div>

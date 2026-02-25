@@ -6,7 +6,7 @@ import PersonaModel from "../models/persona.model.js";
  */
 export const createPersona = async (req, res) => {
     try {
-        const { name, role, personalityTraits, speakingStyle, rules, visibility, openingMessage } = req.body;
+        const { name, role, personalityTraits, speakingStyle, rules, visibility, openingMessage, avatar, background } = req.body;
 
         if (!name || !role || !speakingStyle) {
             return res.status(400).json({
@@ -23,6 +23,8 @@ export const createPersona = async (req, res) => {
             rules: rules || [],
             visibility: visibility || "private",
             openingMessage: openingMessage || "",
+            avatar: avatar || "",
+            background: background || "",
             isSystem: false, // Regular users cannot create system personas
             createdBy: req.user._id
         });
@@ -73,7 +75,7 @@ export const getPersonas = async (req, res) => {
 export const updatePersona = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, role, personalityTraits, speakingStyle, rules, visibility, openingMessage } = req.body;
+        const { name, role, personalityTraits, speakingStyle, rules, visibility, openingMessage, avatar, background } = req.body;
 
         const persona = await PersonaModel.findById(id);
 
@@ -109,7 +111,9 @@ export const updatePersona = async (req, res) => {
                 speakingStyle: speakingStyle || persona.speakingStyle,
                 rules: rules || persona.rules,
                 visibility: visibility || persona.visibility,
-                openingMessage: openingMessage !== undefined ? openingMessage : persona.openingMessage
+                openingMessage: openingMessage !== undefined ? openingMessage : persona.openingMessage,
+                avatar: avatar !== undefined ? avatar : persona.avatar,
+                background: background !== undefined ? background : persona.background
             },
             { new: true }
         );

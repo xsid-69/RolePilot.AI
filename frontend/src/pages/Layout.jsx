@@ -8,7 +8,8 @@ import ChatHistory from '../components/ChatHistory';
 import PersonaCard from '../components/PersonaCard';
 import PersonaModal from '../components/PersonaModal';
 import { toast } from 'react-toastify';
-import { Sparkles, History } from 'lucide-react';
+import { Sparkles, History, ChevronDown } from 'lucide-react';
+import MarkdownRenderer from '../components/MarkdownRenderer';
 
 import { useUser } from '../context/UserContextShared';
 
@@ -29,6 +30,7 @@ const Layout = () => {
   const [pullProgress, setPullProgress] = useState(0);
   const [isPulling, setIsPulling] = useState(false);
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
   const pullIntervalRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -248,9 +250,15 @@ const Layout = () => {
           });
       }
     } catch (err) {
-        console.error("Error sending message", err);
-        setIsLoading(false);
+      console.error("Socket emit error", err);
+      setIsLoading(false);
     }
+  };
+
+  const handleChatScroll = (e) => {
+    const container = e.currentTarget;
+    const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
+    setShowScrollButton(!isAtBottom);
   };
 
   // --- Scroll-Triggered History Logic (Bottom Hold) ---
@@ -348,12 +356,28 @@ const Layout = () => {
   }, [messages.length]);
 
   return (
-    <div className="h-screen bg-[#0d0f14] text-white font-sans selection:bg-blue-500/30 overflow-y-auto scroll-smooth">
-      {/* Premium Background System */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="accent-glow top-[-10%] left-[-5%] w-[50%] h-[50%] bg-blue-600/10 animate-pulse" />
-        <div className="accent-glow bottom-[-5%] right-[-5%] w-[40%] h-[40%] bg-indigo-600/10 animate-pulse" style={{ animationDelay: '3s' }} />
-        <div className="accent-glow top-[30%] right-[10%] w-[30%] h-[30%] bg-blue-400/5" style={{ animationDelay: '5s' }} />
+    <div className="h-screen bg-[#030712] text-white font-sans selection:bg-blue-500/30 overflow-y-auto scroll-smooth">
+      {/* Premium Dynamic Background System */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-[#030712]">
+        {/* Role-specific background image (if active) */}
+        {selectedPersona?.background && messages.length > 0 && (
+          <div className="absolute inset-0 z-0 animate-in fade-in duration-1000">
+            <img 
+              src={selectedPersona.background} 
+              className="w-full h-full object-cover opacity-[0.07] grayscale contrast-125"
+              alt="" 
+            />
+            <div className="absolute inset-0 bg-linear-to-b from-[#030712] via-transparent to-[#030712]" />
+          </div>
+        )}
+
+        <div className={`accent-glow top-[-15%] left-[-10%] w-[60%] h-[60%] animate-pulse transition-all duration-1000 ${
+          selectedPersona ? 'bg-blue-600/10' : 'bg-blue-600/15'
+        }`} />
+        <div className="accent-glow bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-violet-600/15" style={{ animationDelay: '3s' }} />
+        <div className={`accent-glow top-[20%] right-[15%] w-[35%] h-[35%] transition-all duration-1000 ${
+           selectedPersona ? 'bg-rose-500/5' : 'bg-rose-500/10'
+        }`} style={{ animationDelay: '5s' }} />
       </div>
 
       <PersonaModal 
@@ -422,7 +446,7 @@ const Layout = () => {
 
                 {user && chats.length > 0 && (
                      <div className="mt-auto pb-12 flex flex-col items-center gap-4 opacity-30 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">Swipe up and hold to see history</span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">Swipe up and hold to see previous chats</span>
                         <div className="w-px h-12 bg-linear-to-b from-gray-500 to-transparent" />
                      </div> 
                 )}
@@ -430,24 +454,33 @@ const Layout = () => {
           ) : (
             <div 
               onWheel={handleWheel}
+              onScroll={handleChatScroll}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
-              className="w-full max-w-4xl mx-auto flex-1 overflow-y-auto px-6 py-5 custom-scrollbar flex flex-col gap-8"
+              className="w-full max-w-4xl mx-auto flex-1 overflow-y-auto px-6 py-5 custom-scrollbar flex flex-col gap-8 relative"
             >
                {messages.map((msg, idx) => (
-                 <div key={idx} className={`flex gap-5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-4 duration-500`}>
+                 <div key={idx} className={`flex gap-5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out fill-mode-both`}>
                     {msg.role === 'ai' && (
-                        <div className="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center shrink-0 border border-blue-500/20 shadow-lg shadow-blue-500/5 mt-1">
-                            <Sparkles size={18} className="text-blue-400" />
+                        <div className="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center shrink-0 border border-blue-500/20 shadow-lg shadow-blue-500/5 mt-1 overflow-hidden">
+                            {selectedPersona?.avatar ? (
+                                <img src={selectedPersona.avatar} className="w-full h-full object-cover" alt="" />
+                            ) : (
+                                <Sparkles size={18} className="text-blue-400" />
+                            )}
                         </div>
                     )}
-                    <div className={`max-w-[80%] rounded-[24px] px-6 py-4 shadow-xl ${
+                    <div className={`${
                       msg.role === 'user' 
-                        ? 'bg-blue-600/15 text-blue-50 border border-blue-500/30 rounded-tr-lg backdrop-blur-md' 
-                        : 'bg-white/3 text-gray-200 border border-white/5 rounded-tl-lg backdrop-blur-md'
+                        ? 'max-w-[80%] rounded-[24px] px-6 py-4 bg-blue-600/15 text-blue-50 border border-blue-500/25 rounded-tr-lg backdrop-blur-md shadow-2xl hover:bg-blue-600/20 transition-all duration-300' 
+                        : 'w-full max-w-[85%] rounded-[28px] px-8 py-6 bg-white/3 text-gray-200 border border-white/6 rounded-tl-lg backdrop-blur-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] hover:border-white/10 transition-all duration-300'
                     }`}>
-                        <p className="text-sm md:text-[15px] leading-relaxed whitespace-pre-wrap font-medium">{msg.content}</p>
+                        {msg.role === 'user' ? (
+                            <p className="text-sm md:text-[15px] leading-relaxed whitespace-pre-wrap font-medium">{msg.content}</p>
+                        ) : (
+                            <MarkdownRenderer content={msg.content} />
+                        )}
                     </div>
                  </div>
                ))}
@@ -465,11 +498,22 @@ const Layout = () => {
                )}
                 {user && chats.length > 0 && (
                     <div className="flex flex-col items-center gap-3 py-10 opacity-20 hover:opacity-40 transition-opacity">
-                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500">Swipe up and hold to see History</span>
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500">Swipe up and hold to see Previous Chats</span>
                         <div className="w-1 h-1 rounded-full bg-gray-600" />
                     </div>
                 )}
                 <div ref={messagesEndRef} className="h-8" />
+
+                {/* Scroll to Bottom Button */}
+                {showScrollButton && (
+                  <button
+                    onClick={scrollToBottom}
+                    className="fixed bottom-28 right-8 md:right-12 p-3 bg-blue-600/90 hover:bg-blue-500 text-white rounded-full shadow-2xl transition-all duration-300 animate-in fade-in zoom-in-75 slide-in-from-bottom-4 group z-30 active:scale-90"
+                    title="Scroll to bottom"
+                  >
+                    <ChevronDown size={20} className="group-hover:translate-y-0.5 transition-transform" />
+                  </button>
+                )}
             </div>
           )}
 
@@ -503,7 +547,7 @@ const Layout = () => {
                     </div>
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400 bg-[#0d0f14] px-3 py-1 rounded-full border border-blue-500/20 shadow-2xl">
-                    Hold to Archive
+                    Hold to View Chats
                 </span>
             </div>
           )}
