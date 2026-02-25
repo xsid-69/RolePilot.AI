@@ -77,4 +77,32 @@ async function getMessages(req, res) {
     }
 }
 
-export { createChat, getAllChats, getMessages };
+async function deleteChat(req, res) {
+    try {
+        const { chatId } = req.params;
+        const chat = await ChatModel.findOne({ _id: chatId, user: req.user._id });
+
+        if (!chat) {
+            return res.status(404).json({
+                success: false,
+                message: "Chat not found or access denied"
+            });
+        }
+
+        await ChatModel.deleteOne({ _id: chatId });
+        await MessageModel.deleteMany({ chat: chatId });
+
+        return res.status(200).json({
+            success: true,
+            message: "Chat and its history deleted successfully"
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to delete chat",
+            error: error.message
+        });
+    }
+}
+
+export { createChat, getAllChats, getMessages, deleteChat };

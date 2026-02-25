@@ -177,7 +177,7 @@ const SignUpPage = () => {
 
               <button
                 type="submit"
-                className="animate-element animate-delay-600 w-full rounded-2xl bg-blue-500 text-white py-4 font-medium hover:bg-blue-600 transition-all duration-200 shadow-lg shadow-white/10 cursor-pointer active:scale-95">
+                className="animate-element animate-delay-600 w-full rounded-2xl bg-blue-500 text-white py-4 font-bold hover:bg-blue-600 transition-all duration-300 shadow-xl shadow-blue-500/20 cursor-pointer active:scale-95 text-sm uppercase tracking-widest">
                 Sign Up
               </button>
             </form>
@@ -189,9 +189,9 @@ const SignUpPage = () => {
             </div>
 
             <button
-              className="animate-element animate-delay-800 w-full flex items-center justify-center gap-3 border border-border rounded-2xl py-4 bg-white hover:bg-white/50 transition-all duration-200 cursor-pointer active:scale-95">
+              className="animate-element animate-delay-800 w-full flex items-center justify-center gap-3 border border-white/10 rounded-2xl py-4 bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer active:scale-95 text-white">
                 <GoogleIcon />
-                <span className="text-sm font-medium">Continue with Google</span>
+                <span className="text-sm font-semibold">Continue with Google</span>
             </button>
 
             <p

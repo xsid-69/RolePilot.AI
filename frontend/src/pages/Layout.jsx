@@ -8,7 +8,7 @@ import ChatHistory from '../components/ChatHistory';
 import PersonaCard from '../components/PersonaCard';
 import PersonaModal from '../components/PersonaModal';
 import { toast } from 'react-toastify';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, History } from 'lucide-react';
 
 import { useUser } from '../context/UserContextShared';
 
@@ -26,6 +26,10 @@ const Layout = () => {
   const [isPersonaModalOpen, setIsPersonaModalOpen] = useState(false);
   const [editingPersona, setEditingPersona] = useState(null);
   const [personaError, setPersonaError] = useState(null);
+  const [pullProgress, setPullProgress] = useState(0);
+  const [isPulling, setIsPulling] = useState(false);
+  const [isHistoryVisible, setIsHistoryVisible] = useState(false);
+  const pullIntervalRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -63,8 +67,21 @@ const Layout = () => {
   }, []);
 
   useEffect(() => {
-    fetchChats();
-    fetchPersonas();
+    if (!user) {
+        setChatId(null);
+        setMessages([]);
+        setChats([]);
+        setIsHistoryVisible(false);
+        setPullProgress(0);
+        setIsPulling(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+        fetchChats();
+        fetchPersonas();
+    }
     
     // Global hook for Header to trigger persona management
     window.onManagePersonas = () => {
@@ -75,7 +92,7 @@ const Layout = () => {
     return () => {
         delete window.onManagePersonas;
     };
-  }, [fetchChats, fetchPersonas]);
+  }, [fetchChats, fetchPersonas, user]);
 
 
 
@@ -136,6 +153,24 @@ const Layout = () => {
           console.error("Failed to load chat messages", error);
       } finally {
           setIsLoading(false);
+      }
+  };
+
+  const handleDeleteChat = async (id) => {
+      if (!window.confirm("Are you sure you want to delete this conversation and its entire history?")) return;
+      try {
+          const res = await axios.delete(`http://localhost:3000/api/chat/${id}`, { withCredentials: true });
+          if (res.data.success) {
+              toast.success("Conversation deleted.");
+              fetchChats();
+              if (chatId === id) {
+                  setChatId(null);
+                  setMessages([]);
+              }
+          }
+      } catch (err) {
+          console.error("Delete Chat Error", err);
+          toast.error("Failed to delete conversation.");
       }
   };
 
@@ -218,11 +253,109 @@ const Layout = () => {
     }
   };
 
-  return (
-    <div className="h-screen bg-[#0f1115] text-white font-sans selection:bg-white/20 overflow-y-auto scroll-smooth snap-y snap-mandatory scrollbar-hide [&::-webkit-scrollbar]:hidden">
-      {/* Ambient Background Glow */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-[50vh] bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-[#1f232e] via-[#0f1115] to-transparent opacity-70 pointer-events-none" />
+  // --- Scroll-Triggered History Logic (Bottom Hold) ---
+  const handleWheel = (e) => {
+    if (!user) return;
+    const container = e.currentTarget;
+    const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 5;
+    
+    if (isAtBottom && e.deltaY > 0) {
+      setIsPulling(true);
+    } else {
+      setIsPulling(false);
+      setPullProgress(0);
+    }
+  };
+
+  const handleTouchStart = (e) => {
+    if (!user) return;
+    const container = e.currentTarget;
+    const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 5;
+    if (isAtBottom) {
+      const touch = e.touches[0];
+      container._startY = touch.clientX || touch.clientY; // Fix for different coordinate systems
+      container._startY = touch.clientY;
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (!user) return;
+    const container = e.currentTarget;
+    const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 5;
+    
+    if (isAtBottom && container._startY !== undefined) {
+      const touch = e.touches[0];
+      const deltaY = touch.clientY - container._startY;
       
+      if (deltaY < -50) { // Pulling UP at the bottom
+        setIsPulling(true);
+      } else if (deltaY > 10) {
+        setIsPulling(false);
+        setPullProgress(0);
+      }
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    const container = e.currentTarget;
+    delete container._startY;
+    setIsPulling(false);
+    setPullProgress(0);
+  };
+
+  useEffect(() => {
+    if (isPulling && !isHistoryVisible) {
+      pullIntervalRef.current = setInterval(() => {
+        setPullProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(pullIntervalRef.current);
+            setIsHistoryVisible(true);
+            setIsPulling(false);
+            return 100;
+          }
+          return prev + 1; // 100 steps * 30ms = 3 seconds
+        });
+      },25);
+    } else {
+      clearInterval(pullIntervalRef.current);
+      setPullProgress(0);
+    }
+    return () => clearInterval(pullIntervalRef.current);
+  }, [isPulling, isHistoryVisible]);
+  // ---------------------------------------
+
+  const [isInputVisible, setIsInputVisible] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = (e) => {
+      if (messages.length > 0) {
+        setIsInputVisible(true);
+        return;
+      }
+      
+      const target = e.target;
+      if (!target || typeof target.scrollTop === 'undefined') return;
+
+      if (target.scrollTop > 20) {
+        setIsInputVisible(false);
+      } else {
+        setIsInputVisible(true);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, true);
+    return () => window.removeEventListener('scroll', handleScroll, true);
+  }, [messages.length]);
+
+  return (
+    <div className="h-screen bg-[#0d0f14] text-white font-sans selection:bg-blue-500/30 overflow-y-auto scroll-smooth">
+      {/* Premium Background System */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="accent-glow top-[-10%] left-[-5%] w-[50%] h-[50%] bg-blue-600/10 animate-pulse" />
+        <div className="accent-glow bottom-[-5%] right-[-5%] w-[40%] h-[40%] bg-indigo-600/10 animate-pulse" style={{ animationDelay: '3s' }} />
+        <div className="accent-glow top-[30%] right-[10%] w-[30%] h-[30%] bg-blue-400/5" style={{ animationDelay: '5s' }} />
+      </div>
+
       <PersonaModal 
           key={editingPersona?._id || (isPersonaModalOpen ? 'new' : 'closed')}
           isOpen={isPersonaModalOpen}
@@ -230,118 +363,206 @@ const Layout = () => {
           onSave={handleSavePersona}
           persona={editingPersona}
       />
-
-      {/* SECTION 1: Chat Interface */}
-      <div className="relative z-10 flex flex-col h-screen snap-start">
-        <Header onNewChat={() => {
-          setMessages([]);
-          setChatId(null);
-          setSelectedPersona(null);
-        }} />
+      
+      {/* Main Container */}
+      <div className="relative z-10 flex flex-col h-screen overflow-hidden">
+        <Header 
+          onNewChat={() => {
+            setMessages([]);
+            setChatId(null);
+            setSelectedPersona(null);
+          }} 
+          onShowHistory={() => setIsHistoryVisible(true)}
+        />
         
-        <main className="flex-1 flex flex-col items-center w-full max-w-5xl mx-auto relative overflow-hidden pb-24 pt-20 min-h-0">
+        <main className="flex-1 flex flex-col w-full max-w-6xl mx-auto relative overflow-hidden pb-10 pt-20 md:pt-28">
           {messages.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-start w-full px-4 overflow-y-auto pt-10 scrollbar-hide">
+            <div 
+              onWheel={handleWheel}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              className="flex-1 flex flex-col items-center w-full px-6 overflow-y-auto custom-scrollbar pt-8"
+            >
                 <Hero />
                 
-                <div className="w-full max-w-4xl mt-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <div className="flex items-center justify-between mb-6 px-2">
-                        <h3 className="text-gray-400 font-medium">Choose a Persona</h3>
+                <div className="w-full mt-12 mb-20">
+                    <div className="flex items-center justify-between mb-8">
+                        <div className="flex items-center gap-3">
+                            <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Personalities</h3>
+                        </div>
                         {user ? (
                             <button 
                                 onClick={() => { setEditingPersona(null); setIsPersonaModalOpen(true); }}
-                                className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1.5 transition-colors"
+                                className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-blue-400 hover:bg-white/10 hover:text-blue-300 transition-all active:scale-95"
                             >
                                 + Create Custom
                             </button>
                         ) : (
-                            <div className="text-gray-500 text-xs italic">Sign in to create custom roles</div>
+                            <div className="text-[10px] text-gray-500 uppercase font-bold tracking-widest bg-white/5 px-4 py-2 rounded-xl border border-white/5">Sign in to customize</div>
                         )}
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
-                        {personas.map(persona => (
-                            <PersonaCard 
-                                key={persona._id}
-                                persona={persona}
-                                isSelected={selectedPersona?._id === persona._id}
-                                onSelect={setSelectedPersona}
-                                isOwner={persona.createdBy === user?._id} 
-                                onEdit={(p) => { setEditingPersona(p); setIsPersonaModalOpen(true); }}
-                                onDelete={handleDeletePersona}
-                            />
+                    <div className="bento-grid">
+                        {personas.map((persona, idx) => (
+                            <div key={persona._id} className="animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both" style={{ animationDelay: `${idx * 100}ms` }}>
+                                <PersonaCard 
+                                    persona={persona}
+                                    isSelected={selectedPersona?._id === persona._id}
+                                    onSelect={setSelectedPersona}
+                                    isOwner={persona.createdBy === user?._id} 
+                                    onEdit={(p) => { setEditingPersona(p); setIsPersonaModalOpen(true); }}
+                                    onDelete={handleDeletePersona}
+                                />
+                            </div>
                         ))}
                     </div>
                 </div>
 
-                {chats.length > 0 && (
-                     <div className="animate-bounce mt-10 text-gray-500 text-sm">Scroll for history ↓</div> 
+                {user && chats.length > 0 && (
+                     <div className="mt-auto pb-12 flex flex-col items-center gap-4 opacity-30 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">Swipe up and hold to see history</span>
+                        <div className="w-px h-12 bg-linear-to-b from-gray-500 to-transparent" />
+                     </div> 
                 )}
             </div>
           ) : (
-            <div className="md:w-[70%] w-[80%] flex-1 overflow-y-auto p-4 scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex flex-col gap-6 mask-image-b">
+            <div 
+              onWheel={handleWheel}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              className="w-full max-w-4xl mx-auto flex-1 overflow-y-auto px-6 py-5 custom-scrollbar flex flex-col gap-8"
+            >
                {messages.map((msg, idx) => (
-                 <div key={idx} className={`flex gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                 <div key={idx} className={`flex gap-5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-4 duration-500`}>
                     {msg.role === 'ai' && (
-                        <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0 border border-blue-500/20">
-                            <Sparkles size={14} className="text-blue-400" />
+                        <div className="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center shrink-0 border border-blue-500/20 shadow-lg shadow-blue-500/5 mt-1">
+                            <Sparkles size={18} className="text-blue-400" />
                         </div>
                     )}
-                    <div className={`max-w-[80%] rounded-2xl p-4 ${
+                    <div className={`max-w-[80%] rounded-[24px] px-6 py-4 shadow-xl ${
                       msg.role === 'user' 
-                        ? 'bg-blue-500/10 text-blue-100 border border-blue-500/20 rounded-tr-sm' 
-                        : 'bg-white/5 text-gray-200 border border-white/10 rounded-tl-sm'
+                        ? 'bg-blue-600/15 text-blue-50 border border-blue-500/30 rounded-tr-lg backdrop-blur-md' 
+                        : 'bg-white/3 text-gray-200 border border-white/5 rounded-tl-lg backdrop-blur-md'
                     }`}>
-                        <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                        <p className="text-sm md:text-[15px] leading-relaxed whitespace-pre-wrap font-medium">{msg.content}</p>
                     </div>
                  </div>
                ))}
                {isLoading && (
-                 <div className="flex gap-4 justify-start">
-                    <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0 border border-blue-500/20">
-                        <Sparkles size={14} className="text-blue-400" />
+                 <div className="flex gap-5 justify-start animate-pulse">
+                    <div className="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center shrink-0 border border-blue-500/20">
+                        <Sparkles size={18} className="text-blue-400" />
                     </div>
-                    <div className="bg-white/5 p-4 rounded-2xl rounded-tl-sm border border-white/10 flex items-center gap-2">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                    <div className="bg-white/3 px-6 py-5 rounded-[24px] rounded-tl-lg border border-white/5 flex items-center gap-3 backdrop-blur-md">
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0s]"></div>
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
                     </div>
                  </div>
                )}
-               <div ref={messagesEndRef} />
+                {user && chats.length > 0 && (
+                    <div className="flex flex-col items-center gap-3 py-10 opacity-20 hover:opacity-40 transition-opacity">
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500">Swipe up and hold to see History</span>
+                        <div className="w-1 h-1 rounded-full bg-gray-600" />
+                    </div>
+                )}
+                <div ref={messagesEndRef} className="h-8" />
+            </div>
+          )}
+
+          {/* Circular Progress for History (Bottom Hold) */}
+          {pullProgress > 0 && (
+            <div className="fixed bottom-32 left-1/2 -translate-x-1/2 z-100 flex flex-col items-center gap-3 animate-in fade-in zoom-in duration-300">
+                <div className="relative w-14 h-14">
+                    {/* Background Ring */}
+                    <svg className="w-full h-full -rotate-90">
+                        <circle
+                            cx="28" cy="28" r="24"
+                            fill="transparent"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                            className="text-white/5"
+                        />
+                        {/* Progress Ring */}
+                        <circle
+                            cx="28" cy="28" r="24"
+                            fill="transparent"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                            strokeDasharray={150.8}
+                            strokeDashoffset={150.8 - (150.8 * pullProgress) / 100}
+                            strokeLinecap="round"
+                            className="text-blue-500 transition-all duration-75 ease-out shadow-[0_0_15px_rgba(59,130,246,0.3)]"
+                        />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <History size={16} className="text-blue-400 animate-pulse" />
+                    </div>
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400 bg-[#0d0f14] px-3 py-1 rounded-full border border-blue-500/20 shadow-2xl">
+                    Hold to Archive
+                </span>
             </div>
           )}
         </main>
         
-        <ChatInput 
-          onSendMessage={handleSendMessage} 
-          chatStarted={messages.length > 0} 
-          personas={personas}
-          selectedPersona={selectedPersona}
-          setSelectedPersona={setSelectedPersona}
-          error={personaError}
-          user={user}
-        />
+        <div className={`fixed ${messages.length > 0 ? 'bottom-4' : 'bottom-12 md:bottom-20'} left-0 right-0 z-20 pointer-events-none transition-all duration-500 ease-in-out ${isInputVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+            <div className="max-w-4xl mx-auto pointer-events-auto px-4 md:px-6">
+                <ChatInput 
+                  onSendMessage={handleSendMessage} 
+                  chatStarted={messages.length > 0} 
+                  personas={personas}
+                  selectedPersona={selectedPersona}
+                  setSelectedPersona={setSelectedPersona}
+                  error={personaError}
+                  user={user}
+                />
+            </div>
+        </div>
       </div>
 
-      {/* SECTION 2: Chat History (Visible on scroll for logged-in users only) */}
-      {user && (
-          <div className="min-h-[50vh] bg-[#0f1115] relative z-10 flex flex-col items-center pt-10 pb-20 snap-start border-t border-white/5">
-            <h3 className="text-gray-400 font-medium mb-6">Chat History</h3>
-            <div className="w-full max-w-3xl px-4">
-                <ChatHistory 
-                    chats={chats} 
-                    activeChatId={chatId} 
-                    onSelectChat={(id) => {
-                        loadChat(id);
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }} 
-                    onNewChat={() => {
-                        setChatId(null);
-                        setMessages([]);
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }} 
-                />
+      {/* SECTION 2: Chat History Popup Overlay */}
+      {isHistoryVisible && user && (
+          <div className="fixed inset-0 z-60 bg-[#0d0f14]/95 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-500 flex flex-col items-center">
+            <button 
+              onClick={() => setIsHistoryVisible(false)}
+              className="absolute top-8 right-8 p-3 bg-white/5 border border-white/10 rounded-2xl text-gray-400 hover:text-white hover:bg-white/10 transition-all active:scale-90"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-widest">Close Archive</span>
+              </div>
+            </button>
+
+            <div className="flex flex-col items-center mt-20 md:mt-32 mb-12 px-6 text-center">
+                <div className="w-14 h-14 rounded-[20px] bg-white/5 flex items-center justify-center mb-6 border border-white/10 shadow-xl">
+                    <History className="w-7 h-7 text-gray-300" />
+                </div>
+                <h3 className="text-3xl font-bold text-white tracking-tight mb-3">Conversation Archive</h3>
+                <p className="text-gray-500 text-sm max-w-xs leading-relaxed font-medium">Continue your professional interactions from previous sessions.</p>
+            </div>
+            
+            <div className="w-full max-w-5xl px-8 overflow-y-auto custom-scrollbar pb-20">
+                <div className="premium-card rounded-[32px] p-8">
+                    <ChatHistory 
+                        chats={chats} 
+                        activeChatId={chatId} 
+                        onSelectChat={(id) => {
+                            loadChat(id);
+                            setIsHistoryVisible(false);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }} 
+                        onDeleteChat={handleDeleteChat}
+                        onNewChat={() => {
+                            setChatId(null);
+                            setMessages([]);
+                            setIsHistoryVisible(false);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }} 
+                    />
+                </div>
             </div>
           </div>
       )}
