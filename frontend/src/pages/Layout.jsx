@@ -98,14 +98,14 @@ const Layout = () => {
 
 
 
-  const handleSavePersona = async (formData) => {
+  const handleSavePersona = useCallback(async (formData) => {
       try {
-          let res;
-          if (editingPersona) {
-              res = await axios.put(`http://localhost:3000/api/personas/${editingPersona._id}`, formData, { withCredentials: true });
-          } else {
-              res = await axios.post("http://localhost:3000/api/personas", formData, { withCredentials: true });
-          }
+          const method = editingPersona ? 'put' : 'post';
+          const endpoint = editingPersona 
+                ? `http://localhost:3000/api/personas/${editingPersona._id}` 
+                : "http://localhost:3000/api/personas";
+          
+          const res = await axios[method](endpoint, formData, { withCredentials: true });
 
           if (res.data.success) {
               toast.success(editingPersona ? "Persona updated!" : "Persona created!");
@@ -114,26 +114,26 @@ const Layout = () => {
               setEditingPersona(null);
           }
       } catch (error) {
-          toast.error(error.response?.data?.message || "Something went wrong.");
+          toast.error(error.response?.data?.message || "Operation failed.");
       }
-  };
+  }, [editingPersona, fetchPersonas]);
 
-  const handleDeletePersona = async (id) => {
-      if (!window.confirm("Are you sure you want to delete this persona?")) return;
+  const handleDeletePersona = useCallback(async (id) => {
+      if (!window.confirm("Delete this persona forever?")) return;
       try {
           const res = await axios.delete(`http://localhost:3000/api/personas/${id}`, { withCredentials: true });
           if (res.data.success) {
               toast.success("Persona deleted.");
               fetchPersonas();
               if (selectedPersona?._id === id) {
-                  setSelectedPersona(personas.find(p => p._id !== id) || null);
+                  setSelectedPersona(null);
               }
           }
       } catch (err) {
           console.error("Delete Error", err);
           toast.error("Failed to delete persona.");
       }
-  };
+  }, [fetchPersonas, selectedPersona?._id]);
 
   const loadChat = async (id) => {
       setChatId(id);
@@ -356,29 +356,27 @@ const Layout = () => {
   }, [messages.length]);
 
   return (
-    <div className="h-screen bg-[#030712] text-white font-sans selection:bg-blue-500/30 overflow-y-auto scroll-smooth">
+    <div className="h-screen bg-[#0c0c0e] text-white font-sans selection:bg-white/30 overflow-y-auto scroll-smooth">
       {/* Premium Dynamic Background System */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-[#030712]">
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-[#0c0c0e]">
+        {/* Glossy radial lighting setup */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_center,rgba(255,255,255,0.06)_0%,transparent_50%,rgba(0,0,0,0.6)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.02)_0%,transparent_100%)]" />
+        
         {/* Role-specific background image (if active) */}
         {selectedPersona?.background && messages.length > 0 && (
           <div className="absolute inset-0 z-0 animate-in fade-in duration-1000">
             <img 
               src={selectedPersona.background} 
-              className="w-full h-full object-cover opacity-[0.07] grayscale contrast-125"
+              className="w-full h-full object-cover opacity-[0.05] grayscale contrast-125 mix-blend-overlay"
               alt="" 
             />
-            <div className="absolute inset-0 bg-linear-to-b from-[#030712] via-transparent to-[#030712]" />
+            <div className="absolute inset-0 bg-linear-to-b from-[#0c0c0e] via-transparent to-[#0c0c0e]" />
           </div>
         )}
-
-        <div className={`accent-glow top-[-15%] left-[-10%] w-[60%] h-[60%] animate-pulse transition-all duration-1000 ${
-          selectedPersona ? 'bg-blue-600/10' : 'bg-blue-600/15'
-        }`} />
-        <div className="accent-glow bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-violet-600/15" style={{ animationDelay: '3s' }} />
-        <div className={`accent-glow top-[20%] right-[15%] w-[35%] h-[35%] transition-all duration-1000 ${
-           selectedPersona ? 'bg-rose-500/5' : 'bg-rose-500/10'
-        }`} style={{ animationDelay: '5s' }} />
       </div>
+
+
 
       <PersonaModal 
           key={editingPersona?._id || (isPersonaModalOpen ? 'new' : 'closed')}
@@ -438,6 +436,7 @@ const Layout = () => {
                                     isOwner={persona.createdBy === user?._id} 
                                     onEdit={(p) => { setEditingPersona(p); setIsPersonaModalOpen(true); }}
                                     onDelete={handleDeletePersona}
+                                    priority={idx < 2}
                                 />
                             </div>
                         ))}
@@ -463,18 +462,18 @@ const Layout = () => {
                {messages.map((msg, idx) => (
                  <div key={idx} className={`flex gap-5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out fill-mode-both`}>
                     {msg.role === 'ai' && (
-                        <div className="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center shrink-0 border border-blue-500/20 shadow-lg shadow-blue-500/5 mt-1 overflow-hidden">
+                        <div className="w-10 h-10 rounded-2xl bg-violet-500/10 flex items-center justify-center shrink-0 border border-violet-500/20 shadow-lg shadow-violet-500/5 mt-1 overflow-hidden">
                             {selectedPersona?.avatar ? (
-                                <img src={selectedPersona.avatar} className="w-full h-full object-cover" alt="" />
+                                <img src={selectedPersona.avatar} className="w-full h-full object-cover" alt={`${selectedPersona.name} avatar`} />
                             ) : (
-                                <Sparkles size={18} className="text-blue-400" />
+                                <Sparkles size={18} className="text-violet-400" />
                             )}
                         </div>
                     )}
                     <div className={`${
                       msg.role === 'user' 
-                        ? 'max-w-[80%] rounded-[24px] px-6 py-4 bg-blue-600/15 text-blue-50 border border-blue-500/25 rounded-tr-lg backdrop-blur-md shadow-2xl hover:bg-blue-600/20 transition-all duration-300' 
-                        : 'w-full max-w-[85%] rounded-[28px] px-8 py-6 bg-white/3 text-gray-200 border border-white/6 rounded-tl-lg backdrop-blur-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] hover:border-white/10 transition-all duration-300'
+                        ? 'max-w-[80%] rounded-[24px] px-6 py-4 bg-white/10 text-white border border-white/20 rounded-tr-lg backdrop-blur-2xl shadow-[0_20px_40px_rgba(255,255,255,0.05)] hover:bg-white/15 transition-all duration-500' 
+                        : 'w-full max-w-[85%] rounded-[28px] px-8 py-6 glass-panel text-gray-200 rounded-tl-lg transition-all duration-300'
                     }`}>
                         {msg.role === 'user' ? (
                             <p className="text-sm md:text-[15px] leading-relaxed whitespace-pre-wrap font-medium">{msg.content}</p>
@@ -486,13 +485,13 @@ const Layout = () => {
                ))}
                {isLoading && (
                  <div className="flex gap-5 justify-start animate-pulse">
-                    <div className="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center shrink-0 border border-blue-500/20">
-                        <Sparkles size={18} className="text-blue-400" />
+                    <div className="w-10 h-10 rounded-2xl bg-violet-500/10 flex items-center justify-center shrink-0 border border-violet-500/20">
+                        <Sparkles size={18} className="text-violet-400" />
                     </div>
                     <div className="bg-white/3 px-6 py-5 rounded-[24px] rounded-tl-lg border border-white/5 flex items-center gap-3 backdrop-blur-md">
-                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0s]"></div>
-                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+                        <div className="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce [animation-delay:0s]"></div>
+                        <div className="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                        <div className="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
                     </div>
                  </div>
                )}
@@ -506,10 +505,11 @@ const Layout = () => {
 
                 {/* Scroll to Bottom Button */}
                 {showScrollButton && (
-                  <button
+                   <button
                     onClick={scrollToBottom}
-                    className="fixed bottom-28 right-8 md:right-12 p-3 bg-blue-600/90 hover:bg-blue-500 text-white rounded-full shadow-2xl transition-all duration-300 animate-in fade-in zoom-in-75 slide-in-from-bottom-4 group z-30 active:scale-90"
+                    className="fixed bottom-28 right-8 md:right-12 p-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-full shadow-2xl transition-all duration-300 animate-in fade-in zoom-in-75 slide-in-from-bottom-4 group z-30 active:scale-90"
                     title="Scroll to bottom"
+                    aria-label="Scroll to bottom of chat"
                   >
                     <ChevronDown size={20} className="group-hover:translate-y-0.5 transition-transform" />
                   </button>
@@ -539,14 +539,14 @@ const Layout = () => {
                             strokeDasharray={150.8}
                             strokeDashoffset={150.8 - (150.8 * pullProgress) / 100}
                             strokeLinecap="round"
-                            className="text-blue-500 transition-all duration-75 ease-out shadow-[0_0_15px_rgba(59,130,246,0.3)]"
+                            className="text-violet-500 transition-all duration-75 ease-out shadow-[0_0_15px_rgba(124,58,237,0.3)]"
                         />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <History size={16} className="text-blue-400 animate-pulse" />
+                        <History size={16} className="text-violet-400 animate-pulse" />
                     </div>
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400 bg-[#0d0f14] px-3 py-1 rounded-full border border-blue-500/20 shadow-2xl">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-violet-400 bg-[#0a0a0c] px-3 py-1 rounded-full border border-violet-500/20 shadow-2xl">
                     Hold to View Chats
                 </span>
             </div>
@@ -568,12 +568,13 @@ const Layout = () => {
         </div>
       </div>
 
-      {/* SECTION 2: Chat History Popup Overlay */}
-      {isHistoryVisible && user && (
-          <div className="fixed inset-0 z-60 bg-[#0d0f14]/95 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-500 flex flex-col items-center">
+       {/* SECTION 2: Chat History Popup Overlay */}
+       {isHistoryVisible && user && (
+           <div className="fixed inset-0 z-60 bg-[#0c0c0e]/80 backdrop-blur-2xl animate-in fade-in zoom-in-98 duration-700 flex flex-col items-center">
             <button 
               onClick={() => setIsHistoryVisible(false)}
               className="absolute top-8 right-8 p-3 bg-white/5 border border-white/10 rounded-2xl text-gray-400 hover:text-white hover:bg-white/10 transition-all active:scale-90"
+              aria-label="Close conversation history"
             >
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold uppercase tracking-widest">Close Archive</span>

@@ -4,13 +4,12 @@ import { Link } from 'react-router-dom';
 import { useUser } from '../context/UserContextShared';
 import { toast } from 'react-toastify';
 
-const Header = ({ onNewChat, onShowHistory }) => {
+const Header = React.memo(({ onNewChat, onShowHistory }) => {
   const { user, logout } = useUser();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const getInitials = () => {
     if (user && user.fullName) {
-        // Handle case where fullName might be deeply nested or just an object
         const first = user.fullName.firstName || "";
         const last = user.fullName.lastName || "";
         return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
@@ -30,7 +29,7 @@ const Header = ({ onNewChat, onShowHistory }) => {
           </div>
           <div className="flex flex-col">
             <span className="text-white font-black text-base md:text-2xl tracking-tighter leading-none text-vibrant-gradient">ROLEPILOT</span>
-            <span className="text-[7px] md:text-[9px] text-blue-400 font-black tracking-[0.4em] uppercase opacity-90 mt-1">Studio AI</span>
+            <span className="text-[7px] md:text-[9px] text-violet-400 font-black tracking-[0.4em] uppercase opacity-90 mt-1">Studio AI</span>
           </div>
         </div>
         
@@ -52,19 +51,23 @@ const Header = ({ onNewChat, onShowHistory }) => {
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="h-9 md:h-11 px-2 md:px-4 flex items-center gap-2 md:gap-3 bg-white/5 hover:bg-white/10 text-white rounded-xl md:rounded-2xl transition-all duration-300 border border-white/5 hover:border-white/10 active:scale-95"
                 >
-                   <div className="w-7 h-7 md:w-8 md:h-8 bg-linear-to-br from-blue-500 to-indigo-600 text-white rounded-lg md:rounded-xl flex items-center justify-center text-[9px] md:text-[10px] font-black shadow-lg shadow-blue-500/20">
-                    {getInitials()}
+                   <div className="w-7 h-7 md:w-8 md:h-8 bg-linear-to-br from-violet-500 to-indigo-600 text-white rounded-lg md:rounded-xl flex items-center justify-center text-[9px] md:text-[10px] font-black shadow-lg shadow-violet-500/20 overflow-hidden">
+                    {user.profilePic ? (
+                        <img src={user.profilePic} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                        getInitials()
+                    )}
                    </div>
                    <span className="hidden sm:inline text-xs font-bold text-gray-300">{user.fullName?.firstName}</span>
                    <ChevronDown size={12} className={`text-gray-500 transition-transform duration-500 ${isDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isDropdownOpen && (
-                    <div className="absolute right-0 mt-3 md:mt-4 w-60 md:w-72 bg-[#0d111a] border border-white/5 rounded-2xl md:rounded-[28px] shadow-[0_30px_60px_rgba(0,0,0,0.6)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-4 duration-500">
+                    <div className="absolute right-0 mt-3 md:mt-4 w-60 md:w-72 bg-[#000000] border border-white/5 rounded-2xl md:rounded-[28px] shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-4 duration-500">
                         <div className="p-4 md:p-6 border-b border-white/5 bg-white/2">
                             <p className="text-xs md:text-sm font-bold text-white truncate">{user.fullName?.firstName} {user.fullName?.lastName}</p>
                             <div className="flex items-center gap-2 mt-1.5 md:mt-2">
-                                <div className="px-1.5 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-[8px] md:text-[9px] font-black text-blue-400 uppercase tracking-widest">Premium Account</div>
+                                <div className="px-1.5 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-[8px] md:text-[9px] font-black text-violet-400 uppercase tracking-widest">Premium Account</div>
                             </div>
                         </div>
                         <div className="p-1.5 md:p-2 space-y-1">
@@ -75,17 +78,21 @@ const Header = ({ onNewChat, onShowHistory }) => {
                                 }}
                                 className="w-full flex items-center gap-3 md:gap-4 px-3 md:px-4 py-2.5 md:py-3 text-[11px] md:text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-xl md:rounded-2xl transition-all duration-200 text-left group"
                             >
-                                <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
-                                    <Sparkles size={14} className="text-blue-400" />
+                                <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-violet-500/10 flex items-center justify-center group-hover:bg-violet-500/20 transition-colors">
+                                    <Sparkles size={14} className="text-violet-400" />
                                 </div>
                                 <span className="font-bold text-[10px] md:text-xs uppercase tracking-widest">Manage Roles</span>
                             </button>
-                            <button className="w-full flex items-center gap-3 md:gap-4 px-3 md:px-4 py-2.5 md:py-3 text-[11px] md:text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-xl md:rounded-2xl transition-all duration-200 text-left group">
+                            <Link 
+                                to="/profile"
+                                onClick={() => setIsDropdownOpen(false)}
+                                className="w-full flex items-center gap-3 md:gap-4 px-3 md:px-4 py-2.5 md:py-3 text-[11px] md:text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-xl md:rounded-2xl transition-all duration-200 text-left group"
+                            >
                                 <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-purple-500/10 flex items-center justify-center group-hover:bg-purple-500/20 transition-colors">
                                     <User size={14} className="text-purple-400" />
                                 </div>
                                 <span className="font-bold text-[10px] md:text-xs uppercase tracking-widest">Profile Hub</span>
-                            </button>
+                            </Link>
                             <button
                              id='chathistory'
                              onClick={() => {
@@ -102,7 +109,6 @@ const Header = ({ onNewChat, onShowHistory }) => {
                             <button
                                 onClick={() => {
                                     toast.error("User logged out");
-                                    
                                     logout();
                                     setIsDropdownOpen(false);
                                 }}
@@ -129,6 +135,6 @@ const Header = ({ onNewChat, onShowHistory }) => {
       </div>
     </header>
   );
-};
+});
 
 export default Header;

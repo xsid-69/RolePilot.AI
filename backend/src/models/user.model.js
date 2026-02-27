@@ -20,6 +20,22 @@ const userSchema = new mongoose.Schema({
         lastName:{
             type:String,
         }
+    },
+    profilePic: {
+        type: String,
+        default: ""
+    },
+    bio: {
+        type: String,
+        default: ""
+    },
+    jobTitle: {
+        type: String,
+        default: ""
+    },
+    company: {
+        type: String,
+        default: ""
     }
 } , {
         timestamps:true

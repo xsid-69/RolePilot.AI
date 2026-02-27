@@ -35,15 +35,16 @@ const GlassInputWrapper = ({ children}) => (
 
 const TestimonialCard = ({testimonial, delay}) => (
   <div
-    className={`animate-testimonial ${delay} flex items-start gap-3 rounded-3xl bg-card/40 dark:bg-zinc-800/40 backdrop-blur-xl border border-white/10 p-5 w-64`}>
+    className={`animate-testimonial ${delay} flex items-start gap-4 rounded-4xl glass-panel border border-white/5 p-5 w-72 shadow-2xl relative overflow-hidden group hover:scale-[1.02] transition-transform duration-500 bg-[#0c0c0e]/40`}>
+    <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
     <img
       src={testimonial.avatarSrc}
-      className="h-10 w-10 object-cover rounded-2xl"
+      className="h-12 w-12 object-cover rounded-2xl border border-white/10 shadow-lg"
       alt="avatar" />
-    <div className="text-sm leading-snug">
-      <p className="flex items-center gap-1 font-medium">{testimonial.name}</p>
-      <p className="text-muted-foreground">{testimonial.handle}</p>
-      <p className="mt-1 text-foreground/80">{testimonial.text}</p>
+    <div className="text-sm leading-snug relative z-10 w-full">
+      <p className="flex items-center gap-1 font-bold text-white tracking-wide">{testimonial.name}</p>
+      <p className="text-violet-400 text-[10px] font-black uppercase tracking-widest mt-0.5">{testimonial.handle}</p>
+      <p className="mt-2.5 text-gray-300 font-medium text-xs leading-relaxed italic">"{testimonial.text}"</p>
     </div>
   </div>
 );
@@ -90,76 +91,88 @@ const SignUpPage = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row font-sans w-full bg-[#0f1115] text-foreground relative overflow-hidden">
+    <div className="min-h-screen flex flex-col md:flex-row font-sans w-full bg-[#0c0c0e] text-foreground relative overflow-hidden">
       {/* Background Decor */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-size-[24px_24px]"></div>
-          <div className="absolute left-0 top-0 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2"></div>
-          <div className="absolute right-0 bottom-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px] translate-x-1/2 translate-y-1/2"></div>
+      <div className="absolute inset-0 z-0 pointer-events-none bg-[#0c0c0e]">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-size-[24px_24px] pointer-events-none"></div>
+          {/* Glossy radial lighting setup */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_center,rgba(255,255,255,0.06)_0%,transparent_50%,rgba(0,0,0,0.6)_100%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.02)_0%,transparent_100%)]" />
       </div>
       {/* Left column: sign-up form */}
-      <section className="flex-1 flex items-center justify-center p-8 relative z-10">
-        <div className="w-full max-w-md">
-          <div className="flex flex-col gap-6">
-            <h1
-              className="animate-element text-white animate-delay-100 text-4xl md:text-5xl font-semibold leading-tight">
-                <span className="font-light tracking-tighter">Create Account</span>
-              </h1>
-            <p className="animate-element animate-delay-200 text-muted-foreground">Join us and start your journey today</p>
+      <section className="flex-1 flex items-center justify-center p-4 md:p-8 relative z-10 w-full overflow-y-auto custom-scrollbar">
+        <div className="w-full max-w-[440px] relative mt-10 md:mt-0">
+          {/* Ambient Glow behind card */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-violet-600/10 blur-[100px] rounded-full pointer-events-none" />
+          
+          <div className="flex flex-col gap-6 premium-card p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden border border-white/5 backdrop-blur-3xl">
+            {/* Soft inner highlight */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-24 bg-white/5 blur-2xl pointer-events-none rounded-full" />
+            
+            <div className="relative z-10">
+              <div className="mb-0 overflow-hidden">
+                <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-6 border border-white/10 shadow-lg mt-10 md:mt-0">
+                   <img src="/rolepilotai.svg" alt="Logo" className="w-8 h-8 opacity-90" />
+                </div>
+                <h1 className="animate-element animate-delay-100 text-white text-3xl md:text-4xl font-black tracking-tight leading-tight">
+                  Join RolePilot
+                </h1>
+                <p className="animate-element animate-delay-200 text-gray-400 mt-2 text-sm font-medium">Create an account and start building your AI team.</p>
+              </div>
 
             <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
-              <div className="grid grid-cols-2 gap-4 animate-element animate-delay-250">
+              <div className="grid grid-cols-2 gap-4 animate-element animate-delay-250 mt-6">
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">First Name</label>
+                  <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 block ml-1">First Name</label>
                   <GlassInputWrapper>
                     <input
                       {...register("firstName", { required: "First Name is required" })}
                       type="text"
-                      placeholder="First Name"
-                      className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none placeholder:text-muted-foreground/50" />
+                      placeholder="Jane"
+                      className="w-full bg-transparent text-sm p-3.5 rounded-2xl focus:outline-none placeholder:text-gray-600 text-white" />
                   </GlassInputWrapper>
                   {errors.firstName && (
-                    <p className="text-red-400 text-xs mt-1 ml-1">{errors.firstName.message}</p>
+                    <p className="text-red-400 text-[10px] mt-1 ml-1 font-medium">{errors.firstName.message}</p>
                   )}
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">Last Name</label>
+                  <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 block ml-1">Last Name</label>
                   <GlassInputWrapper>
                     <input
                       {...register("lastName", { required: "Last Name is required" })}
                       type="text"
-                      placeholder="Last Name"
-                      className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none placeholder:text-muted-foreground/50" />
+                      placeholder="Doe"
+                      className="w-full bg-transparent text-sm p-3.5 rounded-2xl focus:outline-none placeholder:text-gray-600 text-white" />
                   </GlassInputWrapper>
                   {errors.lastName && (
-                    <p className="text-red-400 text-xs mt-1 ml-1">{errors.lastName.message}</p>
+                    <p className="text-red-400 text-[10px] mt-1 ml-1 font-medium">{errors.lastName.message}</p>
                   )}
                 </div>
               </div>
 
               <div className="animate-element animate-delay-300">
-                <label className="text-sm font-medium text-muted-foreground">Email Address</label>
+                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 block ml-1">Email Address</label>
                 <GlassInputWrapper>
                   <input
                     {...register("email", { required: "Email is required" })}
                     type="email"
-                    placeholder="Enter your email address"
-                    className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none placeholder:text-muted-foreground/50" />
+                    placeholder="name@example.com"
+                    className="w-full bg-transparent text-sm p-3.5 rounded-2xl focus:outline-none placeholder:text-gray-600 text-white" />
                 </GlassInputWrapper>
                 {errors.email && (
-                  <p className="text-red-400 text-xs mt-1 ml-1">{errors.email.message}</p>
+                  <p className="text-red-400 text-[10px] mt-1 ml-1 font-medium">{errors.email.message}</p>
                 )}
               </div>
 
-              <div className="animate-element text-white animate-delay-400">
-                <label className="text-sm font-medium text-muted-foreground">Password</label>
+              <div className="animate-element animate-delay-400">
+                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 block ml-1">Password</label>
                 <GlassInputWrapper>
                   <div className="relative">
                     <input
                       {...register("password", { required: "Password is required" })}
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="Create a password"
-                      className="w-full bg-transparent text-sm p-4 pr-12 rounded-2xl focus:outline-none placeholder:text-muted-foreground/50" />
+                      placeholder="••••••••"
+                      className="w-full bg-transparent text-sm p-3.5 pr-12 rounded-2xl focus:outline-none placeholder:text-gray-600 text-white" />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
@@ -171,49 +184,48 @@ const SignUpPage = () => {
                   </div>
                 </GlassInputWrapper>
                 {errors.password && (
-                  <p className="text-red-400 text-xs mt-1 ml-1">{errors.password.message}</p>
+                  <p className="text-red-400 text-[10px] mt-1 ml-1 font-medium">{errors.password.message}</p>
                 )}
               </div>
 
               <button
                 type="submit"
-                className="animate-element animate-delay-600 w-full rounded-2xl bg-blue-500 text-white py-4 font-bold hover:bg-blue-600 transition-all duration-300 shadow-xl shadow-blue-500/20 cursor-pointer active:scale-95 text-sm uppercase tracking-widest">
-                Sign Up
+                className="animate-element animate-delay-600 w-full rounded-2xl bg-violet-600 text-white py-4 font-black hover:bg-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(124,58,237,0.3)] hover:shadow-[0_0_30px_rgba(124,58,237,0.5)] cursor-pointer active:scale-95 text-xs uppercase tracking-[0.2em] mt-2 pb-3 pt-3">
+                Create Account
               </button>
             </form>
 
-            <div
-              className="animate-element animate-delay-700 relative flex items-center justify-center my-2">
-              <span className="w-full border-t border-border"></span>
-              <span className="px-4 text-xs uppercase tracking-widest text-muted-foreground bg-background absolute">Or continue with</span>
+            <div className="animate-element animate-delay-700 relative flex items-center justify-center my-1.5">
+              <span className="w-full border-t border-white/5"></span>
+              <span className="px-4 text-[10px] uppercase font-bold tracking-widest text-gray-500 bg-transparent absolute backdrop-blur-md pb-0.5">Or Continue With</span>
             </div>
 
-            <button
-              className="animate-element animate-delay-800 w-full flex items-center justify-center gap-3 border border-white/10 rounded-2xl py-4 bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer active:scale-95 text-white">
+            <a href="http://localhost:3000/api/auth/google" className="animate-element animate-delay-800 w-full flex items-center justify-center gap-3 border border-white/5 rounded-2xl py-3 bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer active:scale-95 text-white shadow-lg">
                 <GoogleIcon />
-                <span className="text-sm font-semibold">Continue with Google</span>
-            </button>
+                <span className="text-xs font-bold uppercase tracking-wider">Google</span>
+            </a>
 
-            <p
-              className="animate-element animate-delay-900 text-center text-sm text-muted-foreground mt-4">
-              Already have an account? <a
-              href="/login"
-              className="text-violet-400 hover:underline transition-colors font-medium">Sign In</a>
+            <p className="animate-element animate-delay-900 text-center text-xs text-gray-500 font-medium mt-1">
+              Already have an account? <a href="/login" className="text-violet-400 hover:text-violet-300 hover:underline transition-colors font-bold ml-1">Sign In</a>
             </p>
+
+            </div>
           </div>
         </div>
       </section>
       {/* Right column: hero image + testimonials */}
       {heroImageSrc && (
-        <section className="hidden md:block flex-1 relative p-4 bg-[#0f1115] z-10">
+        <section className="hidden md:block flex-1 relative p-6 bg-transparent z-10">
            <div
-            className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl bg-cover bg-center border border-white/10 overflow-hidden"
+            className="animate-slide-right animate-delay-300 absolute inset-6 rounded-[3rem] bg-cover bg-center border border-white/5 overflow-hidden shadow-2xl"
             style={{ backgroundImage: `url(${heroImageSrc})` }}>
-                <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px]" />
+                <div className="absolute inset-0 bg-linear-to-t from-[#0c0c0e] via-[#0c0c0e]/40 to-transparent mix-blend-multiply" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(124,58,237,0.2)_0%,transparent_60%)] mix-blend-screen" />
+                <div className="absolute inset-0 bg-black/10 backdrop-blur-[2px]" />
             </div>
            
           <div
-            className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-4 px-8 w-full justify-center">
+            className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-6 px-8 w-full justify-center z-20">
             {testimonials.map((t, i) => (
                  <div key={i} className={i > 0 ? "hidden xl:block" : ""}><TestimonialCard testimonial={t} delay={`delay-${(i+5)*100}`} /></div>
             ))}
@@ -223,4 +235,5 @@ const SignUpPage = () => {
     </div>
   );
 };
+
 export default SignUpPage;

@@ -4,9 +4,73 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/rolepilotai.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RolePilotAi</title>
+    <meta name="theme-color" content="#030712" />
+
+    <title>
+      RolePilot AI | Elite Character Roleplay & Professional AI Personas
+    </title>
+    <meta
+      name="description"
+      content="Engage with elite AI personas refined for professional excellence and creative depth. RolePilot AI brings high-fidelity character roleplay to your fingertips."
+    />
+    <meta
+      name="keywords"
+      content="AI, Roleplay, Personas, Character AI, Professional AI, RolePilot, AI Studio"
+    />
+    <meta name="author" content="RolePilot AI Team" />
+
+    <!-- Performance Optimizations -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://images.unsplash.com" />
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
+    
+    <link rel="preload" href="/rolepilotai.svg" as="image" type="image/svg+xml" fetchpriority="high" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;900&display=swap" rel="stylesheet" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://rolepilot.ai/" />
+    <meta
+      property="og:title"
+      content="RolePilot AI | Elite Character Roleplay"
+    />
+    <meta
+      property="og:description"
+      content="Engage with elite AI personas refined for professional excellence and creative depth."
+    />
+    <meta property="og:image" content="/og-image.jpg" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://rolepilot.ai/" />
+    <meta
+      property="twitter:title"
+      content="RolePilot AI | Elite Character Roleplay"
+    />
+    <meta
+      property="twitter:description"
+      content="Engage with elite AI personas refined for professional excellence and creative depth."
+    />
+    <meta property="twitter:image" content="/og-image.jpg" />
+
+    <style>
+      body { background-color: #030712; margin: 0; }
+      #initial-loader {
+        position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+        background: #030712; z-index: 9999; transition: opacity 0.5s;
+      }
+      .spinner {
+        width: 40px; height: 40px; border: 3px solid rgba(59, 130, 246, 0.2);
+        border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
   </head>
   <body>
+    <div id="initial-loader">
+      <div class="spinner"></div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

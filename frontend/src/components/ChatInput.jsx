@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Paperclip, Globe, Image as ImageIcon, ArrowUp, Sparkles, 
   Heart, Stethoscope, Moon, Coffee, Code, Target, ClipboardCheck, Smile,
@@ -19,6 +19,27 @@ const ROLE_ICONS = {
 const ChatInput = ({ onSendMessage, chatStarted, personas = [], selectedPersona, setSelectedPersona, error, user }) => {
   const [isRoleOpen, setIsRoleOpen] = useState(false);
   const [message, setMessage] = useState("");
+  const [isAttaching, setIsAttaching] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsAttaching(true);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target.result;
+      setMessage(prev => prev + (prev.trim() ? `\n\n` : '') + `[Attached File: ${file.name}]\n${text}\n`);
+      setIsAttaching(false);
+    };
+    reader.onerror = () => {
+      alert("Failed to read file. Please ensure it is a text-based file.");
+      setIsAttaching(false);
+    };
+    reader.readAsText(file);
+    e.target.value = null; // reset for same file re-selection
+  };
 
   const systemPersonas = personas?.filter(p => p.isSystem) || [];
   const customPersonas = personas?.filter(p => !p.isSystem) || [];
@@ -33,13 +54,17 @@ const ChatInput = ({ onSendMessage, chatStarted, personas = [], selectedPersona,
           setIsRoleOpen(false);
         }}
         className={`flex items-center gap-2 md:gap-3 px-2 md:px-3 py-2 md:py-2.5 rounded-xl md:rounded-2xl group transition-all duration-200 text-left ${
-          selectedPersona?._id === persona._id ? 'bg-blue-500/20 border border-blue-500/30' : 'hover:bg-white/5 border border-transparent'
+          selectedPersona?._id === persona._id ? 'bg-violet-500/10 border border-violet-500/20' : 'hover:bg-white/5 border border-transparent'
         }`}
       >
         <div className={`w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-300 ${
-          selectedPersona?._id === persona._id ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' : 'bg-white/5 group-hover:bg-white/10 text-gray-400 group-hover:text-blue-400'
+          selectedPersona?._id === persona._id ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/20' : 'bg-white/5 group-hover:bg-white/10 text-gray-400 group-hover:text-violet-400'
         }`}>
-          <IconComponent size={14} className="md:w-[18px] md:h-[18px]" />
+          {persona.avatar ? (
+            <img src={persona.avatar} alt={persona.name} className="w-full h-full object-cover rounded-lg md:rounded-xl" />
+          ) : (
+            <IconComponent size={14} className="md:w-[18px] md:h-[18px]" />
+          )}
         </div>
         <div className="flex flex-col min-w-0">
           <span className={`text-[11px] md:text-sm font-semibold truncate transition-colors duration-200 ${
@@ -64,20 +89,20 @@ const ChatInput = ({ onSendMessage, chatStarted, personas = [], selectedPersona,
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
       handleSend();
     }
   };
 
   return (
-    <div className={`w-full max-w-3xl mx-auto px-2 md:px-4 z-20 transition-all duration-700 ease-in-out ${
-      chatStarted ? "absolute bottom-0 left-0 right-0 transform-none scale-100" : "absolute left-0 right-0 top-[80%] md:top-[75%] -translate-y-1/2 scale-100 md:scale-105"
+    <div className={`w-full max-w-3xl  mx-auto px-2 md:px-4 z-20 transition-all duration-700 ease-in-out ${
+      chatStarted ? "absolute bottom-0.5 left-0 right-0 transform-none scale-100" : "absolute left-0 right-0 top-[80%] md:top-[75%] -translate-y-1/2 scale-100 md:scale-105"
     }`}>
-      <div className={`bg-[#1a1d26]/80 backdrop-blur-xl border border-white/5 rounded-2xl md:rounded-3xl shadow-2xl transition-all duration-700 ${
+      <div className={`glass-panel mb-3 md:mb-5 transition-all duration-700 rounded-[2.5rem]! ${
         chatStarted ? "p-1.5 md:p-2" : "p-3 md:p-4"
       }`}>
-        <input
-          type="text"
+        <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -85,18 +110,31 @@ const ChatInput = ({ onSendMessage, chatStarted, personas = [], selectedPersona,
           placeholder={
             !user ? "Please login to continue chat..." : 
             !selectedPersona ? "Select a persona to start chatting..." :
+            isAttaching ? "Reading file..." :
             `Message ${selectedPersona?.name}...`
           }
-          className={`w-full bg-transparent text-white placeholder-gray-500 outline-none px-2 transition-all duration-700 ${
-            chatStarted ? "text-sm md:text-base pb-0.5 md:pb-1" : "text-base md:text-lg pb-4 md:pb-6"
+          rows={Math.max(1, Math.min(5, message.split('\n').length))}
+          className={`w-full bg-transparent text-white placeholder-gray-500 outline-none px-4 md:px-6 transition-all duration-700 resize-none overflow-y-auto custom-scrollbar ${
+            chatStarted ? "text-sm md:text-base pb-0 md:pb-1 pt-1 md:pt-2" : "text-base md:text-lg pb-4 md:pb-6 pt-2 md:pt-3"
           } ${!user ? 'cursor-not-allowed italic' : ''}`}
         />
         
-        <div className="flex justify-between items-center mt-1 md:mt-2 px-1 md:px-2">
+        <div className="flex justify-between items-center mt-1 md:mt-2 px-2 md:px-4">
           <div className="flex items-center gap-2 md:gap-4 text-gray-400">
-            <button className="hover:text-white transition-all duration-200 p-1 md:p-1.5 hover:bg-white/5 rounded-lg cursor-pointer active:scale-90">
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              className={`hover:text-white transition-all duration-200 p-1 md:p-1.5 hover:bg-white/5 rounded-lg cursor-pointer active:scale-90 ${isAttaching ? 'animate-pulse text-violet-400' : ''}`}
+              title="Attach File"
+            >
               <Paperclip className="w-4 h-4 md:w-5 md:h-5" />
             </button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              onChange={handleFileChange}
+              accept=".txt,.js,.jsx,.ts,.tsx,.json,.md,.csv,.html,.css" 
+            />
             <button className="hover:text-white transition-all duration-200 p-1 md:p-1.5 hover:bg-white/5 rounded-lg cursor-pointer active:scale-90">
               <Globe className="w-4 h-4 md:w-5 md:h-5" />
             </button>
@@ -111,10 +149,10 @@ const ChatInput = ({ onSendMessage, chatStarted, personas = [], selectedPersona,
               <button 
                 id='roleselector'
                 onClick={() => setIsRoleOpen(!isRoleOpen)}
-                className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-95 border border-white/5 bg-blue-500/10`}
+                className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-95 border border-white/10 glass-panel hover:bg-white/5`}
                 title="Select Role"
               >
-                <Sparkles className={`w-4 h-4 md:w-5 md:h-5 text-blue-400`} />
+                <Sparkles className={`w-4 h-4 md:w-5 md:h-5 text-violet-400`} />
               </button>
 
               {isRoleOpen && (
@@ -123,7 +161,7 @@ const ChatInput = ({ onSendMessage, chatStarted, personas = [], selectedPersona,
                     className="fixed inset-0 z-30" 
                     onClick={() => setIsRoleOpen(false)}
                   />
-                  <div className="absolute bottom-full right-0 mb-3 md:mb-4 w-64 md:w-72 bg-[#1a1d26] border border-white/10 rounded-2xl md:rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] p-3 md:p-4 z-40 animate-in fade-in slide-in-from-bottom-5 duration-200 origin-bottom-right">
+                  <div className="absolute bottom-full right-0 mb-3 md:mb-4 w-64 md:w-72 glass-panel rounded-3xl! overflow-hidden p-3 md:p-4 z-40 animate-in fade-in slide-in-from-bottom-5 duration-300 origin-bottom-right">
                     <div className="max-h-64 md:max-h-80 overflow-y-auto pr-1 space-y-3 md:space-y-4">
                       {error ? (
                         <div className="py-4 md:py-6 text-center px-2 md:px-4">
