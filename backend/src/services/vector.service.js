@@ -4,7 +4,6 @@ import { Pinecone } from "@pinecone-database/pinecone";
 const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
 
 const rolepilotIndex = pc.index('rolepilotai');
-console.log("Vector Service Initialized");
 
 async function createMemory({ id, vector, metadata }) {
     try {

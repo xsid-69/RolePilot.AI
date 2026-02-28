@@ -56,7 +56,7 @@ const Profile = () => {
         setIsLoading(true);
 
         try {
-            const res = await axios.put('http://localhost:3000/api/auth/profile', {
+            const res = await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/auth/profile`, {
                 firstName,
                 lastName,
                 profilePic,
@@ -88,7 +88,7 @@ const Profile = () => {
         setIsPasswordLoading(true);
 
         try {
-            const res = await axios.put('http://localhost:3000/api/auth/password', {
+            const res = await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/auth/password`, {
                 currentPassword,
                 newPassword
             }, { withCredentials: true });

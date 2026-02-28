@@ -8,7 +8,7 @@ const ChatHistory = ({ chats = [], activeChatId, onSelectChat, onDeleteChat }) =
         <div className="w-full mx-auto"> 
             <div 
                 ref={scrollRef}
-                className="flex flex-col gap-3 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar"
+                className="flex flex-col gap-3 overflow-y-auto max-h-[60vh] md:max-h-[65vh] pr-2 custom-scrollbar"
             >
                 {chats.length === 0 ? (
                     <div className="py-12 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-2xl">

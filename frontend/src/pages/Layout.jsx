@@ -39,7 +39,7 @@ const Layout = () => {
 
   const fetchChats = useCallback(async () => {
       try {
-          const res = await axios.get("http://localhost:3000/api/chat", { withCredentials: true });
+          const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/chat`, { withCredentials: true });
           if(res.data.success){
               setChats(res.data.chats);
           }
@@ -50,11 +50,8 @@ const Layout = () => {
 
   const fetchPersonas = useCallback(async () => {
       try {
-          console.log("Fetching personas from API...");
-          const res = await axios.get("http://localhost:3000/api/personas", { withCredentials: true });
-          console.log("API Response:", res.data);
+          const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/personas`, { withCredentials: true });
           if (res.data.success) {
-              console.log(`Fetched ${res.data.personas.length} personas`);
               setPersonas(res.data.personas);
               setPersonaError(null);
           } else {
@@ -102,8 +99,8 @@ const Layout = () => {
       try {
           const method = editingPersona ? 'put' : 'post';
           const endpoint = editingPersona 
-                ? `http://localhost:3000/api/personas/${editingPersona._id}` 
-                : "http://localhost:3000/api/personas";
+                ? `${import.meta.env.VITE_BACKEND_URL}/api/personas/${editingPersona._id}` 
+                : `${import.meta.env.VITE_BACKEND_URL}/api/personas`;
           
           const res = await axios[method](endpoint, formData, { withCredentials: true });
 
@@ -121,7 +118,7 @@ const Layout = () => {
   const handleDeletePersona = useCallback(async (id) => {
       if (!window.confirm("Delete this persona forever?")) return;
       try {
-          const res = await axios.delete(`http://localhost:3000/api/personas/${id}`, { withCredentials: true });
+          const res = await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/personas/${id}`, { withCredentials: true });
           if (res.data.success) {
               toast.success("Persona deleted.");
               fetchPersonas();
@@ -140,7 +137,7 @@ const Layout = () => {
       setIsLoading(true);
       setMessages([]); // Clear previous messages immediately
       try {
-          const res = await axios.get(`http://localhost:3000/api/chat/${id}/messages`, { withCredentials: true });
+          const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/chat/${id}/messages`, { withCredentials: true });
           if (res.data.success) {
               setMessages(res.data.messages.map(msg => ({ role: msg.role === 'model' ? 'ai' : msg.role, content: msg.content })));
               
@@ -161,7 +158,7 @@ const Layout = () => {
   const handleDeleteChat = async (id) => {
       if (!window.confirm("Are you sure you want to delete this conversation and its entire history?")) return;
       try {
-          const res = await axios.delete(`http://localhost:3000/api/chat/${id}`, { withCredentials: true });
+          const res = await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/chat/${id}`, { withCredentials: true });
           if (res.data.success) {
               toast.success("Conversation deleted.");
               fetchChats();
@@ -188,13 +185,12 @@ const Layout = () => {
   }, [selectedPersona, chatId, messages.length]);
 
   useEffect(() => {
-    const newSocket = io("http://localhost:3000", {
+    const newSocket = io(import.meta.env.VITE_BACKEND_URL, {
       withCredentials: true,
     });
     socketRef.current = newSocket;
 
     newSocket.on('connect', () => {
-      console.log('Connected to socket');
     });
 
     newSocket.on('ai-response', (data) => {
@@ -227,7 +223,7 @@ const Layout = () => {
          }
 
          try {
-            const res = await axios.post("http://localhost:3000/api/chat", { 
+            const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/chat`, { 
                 title: content.substring(0, 20),
                 personaId: selectedPersona._id
             }, { withCredentials: true });
@@ -581,12 +577,12 @@ const Layout = () => {
               </div>
             </button>
 
-            <div className="flex flex-col items-center mt-20 md:mt-32 mb-12 px-6 text-center">
-                <div className="w-14 h-14 rounded-[20px] bg-white/5 flex items-center justify-center mb-6 border border-white/10 shadow-xl">
-                    <History className="w-7 h-7 text-gray-300" />
+            <div className="flex flex-col items-center mt-12 md:mt-16 mb-6 px-6 text-center">
+                <div className="w-12 h-12 rounded-[20px] bg-white/5 flex items-center justify-center mb-4 border border-white/10 shadow-xl">
+                    <History className="w-6 h-6 text-gray-300" />
                 </div>
-                <h3 className="text-3xl font-bold text-white tracking-tight mb-3">Conversation Archive</h3>
-                <p className="text-gray-500 text-sm max-w-xs leading-relaxed font-medium">Continue your professional interactions from previous sessions.</p>
+                <h3 className="text-2xl font-bold text-white tracking-tight mb-2">Conversation Archive</h3>
+                <p className="text-gray-500 text-xs max-w-xs leading-relaxed font-medium">Continue your professional interactions from previous sessions.</p>
             </div>
             
             <div className="w-full max-w-5xl px-8 overflow-y-auto custom-scrollbar pb-20">

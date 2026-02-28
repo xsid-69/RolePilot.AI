@@ -26,7 +26,8 @@ const AuthSuccess = () => {
         } else {
             navigate("/login");
         }
-    }, [location, login, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#0c0c0e] text-white">

@@ -35,7 +35,6 @@ async function registerUser(req,res){
             company:user.company
         }
     })
-    console.log(user ,"user created");
 }
 
 async function loginUser(req,res){
@@ -66,7 +65,6 @@ async function loginUser(req,res){
          company:user.company
       }
    })
-   console.log(user ,"user logged in");
 
 }  
 
@@ -133,10 +131,11 @@ async function updatePassword(req, res) {
 }
 
 async function googleAuthCallback(req, res) {
+   const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
    try {
       const user = req.user;
       if (!user) {
-         return res.redirect("http://localhost:5173/login?error=GoogleAuthFailed");
+         return res.redirect(`${FRONTEND_URL}/login?error=GoogleAuthFailed`);
       }
 
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "4d" });
@@ -152,10 +151,10 @@ async function googleAuthCallback(req, res) {
          company: user.company
       });
 
-      res.redirect(`http://localhost:5173/auth/success?user=${encodeURIComponent(userData)}`);
+      res.redirect(`${FRONTEND_URL}/auth/success?user=${encodeURIComponent(userData)}`);
    } catch (error) {
       console.error("Error in google auth callback:", error);
-      res.redirect("http://localhost:5173/login?error=InternalServerError");
+      res.redirect(`${FRONTEND_URL}/login?error=InternalServerError`);
    }
 }
 

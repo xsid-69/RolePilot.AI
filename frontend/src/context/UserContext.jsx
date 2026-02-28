@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { UserContext } from './UserContextShared';
 
 export const UserProvider = ({ children }) => {
@@ -7,15 +7,15 @@ export const UserProvider = ({ children }) => {
         return storedUser ? JSON.parse(storedUser) : null;
     });
 
-    const login = (userData) => {
+    const login = useCallback((userData) => {
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
-    };
+    }, []);
 
-    const logout = () => {
+    const logout = useCallback(() => {
         setUser(null);
         localStorage.removeItem('user');
-    };
+    }, []);
 
     return (
         <UserContext.Provider value={{ user, login, logout }}>

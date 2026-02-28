@@ -53,7 +53,6 @@ export const getPersonas = async (req, res) => {
             : { visibility: "public" };
 
         const personas = await PersonaModel.find(query).sort({ createdAt: -1 });
-        console.log(`Backend: Found ${personas.length} personas for ${req.user ? "user " + req.user._id : "anonymous guest"}`);
 
         res.status(200).json({
             success: true,

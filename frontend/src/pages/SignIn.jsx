@@ -57,13 +57,12 @@ const SignInPage = () => {
 
   const onSubmit = async (data) => {
     try {
-      const response = await axios.post("http://localhost:3000/api/auth/login", {
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/login`, {
         email: data.email,
         password: data.password
       }, {
         withCredentials: true
       });
-      console.log(response.data);
       login(response.data.user);
       toast.success("User logged in successfully");
       navigate("/");
@@ -172,7 +171,7 @@ const SignInPage = () => {
               <span className="px-4 text-[10px] uppercase font-bold tracking-widest text-gray-500 bg-transparent absolute backdrop-blur-md pb-0.5">Or Continue With</span>
             </div>
 
-            <a href="http://localhost:3000/api/auth/google" className="animate-element animate-delay-800 w-full flex items-center justify-center gap-3 border border-white/5 rounded-2xl py-3.5 bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer active:scale-95 text-white shadow-lg">
+            <a href={`${import.meta.env.VITE_BACKEND_URL}/api/auth/google`} className="animate-element animate-delay-800 w-full flex items-center justify-center gap-3 border border-white/5 rounded-2xl py-3.5 bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer active:scale-95 text-white shadow-lg">
                 <GoogleIcon />
                 <span className="text-xs font-bold uppercase tracking-wider">Google</span>
             </a>

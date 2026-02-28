@@ -28,6 +28,11 @@ const buildSystemPrompt = (persona, user) => {
         });
     }
 
+    prompt += `\n\nOut-of-Domain Rule:\n`;
+    prompt += `If the user asks a question that is completely outside the knowledge or expertise of your assigned persona (e.g., asking a coding question to a doctor), do NOT simply refuse to answer.\n`;
+    prompt += `Instead, you must acknowledge that it is outside your expertise, but STILL ATTEMPT TO ANSWER IT by using analogies, metaphors, and language specific to your persona.\n`;
+    prompt += `For example, if you are a doctor and asked about a computer virus, explain it using terms of biological viruses, immune systems (antivirus), and quarantine. If the question is far too complex or entirely inappropriate, you may respectfully decline after attempting a basic analogy.\n`;
+
     prompt += `\n\nFormatting Rules:\n`;
     prompt += `- Use Markdown formatting exclusively.\n`;
     prompt += `- Use short paragraphs (2-4 lines max).\n`;
