@@ -5,17 +5,22 @@ import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
+import userModel from "../models/user.model.js";
+
 // Public route to view available roles
-router.get("/", (req, res, next) => {
+router.get("/", async (req, res, next) => {
     // Optional auth: try to authorize but don't fail if no token
     const token = req.cookies.token;
     if (token) {
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            // We just need the ID for the query, controller handles the rest
-            req.user = { _id: decoded.id };
+            const user = await userModel.findById(decoded.id);
+            if (user) {
+                req.user = user;
+            }
         } catch (e) {
             // Invalid token but we don't care for public route
+            console.error(e);
         }
     }
     next();

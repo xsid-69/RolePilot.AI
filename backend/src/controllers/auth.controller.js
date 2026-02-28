@@ -21,7 +21,13 @@ async function registerUser(req,res){
       
     const token = jwt.sign({id:user._id},process.env.JWT_SECRET,{expiresIn:"4d"});
     
-    res.cookie("token" ,token)
+    const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+    };
+
+    res.cookie("token", token, cookieOptions);
 
     res.status(201).json({
         message: " User created Successfully",
@@ -51,7 +57,13 @@ async function loginUser(req,res){
 
    const token = jwt.sign({id:user._id},process.env.JWT_SECRET,{expiresIn:"4d"})
 
-   res.cookie("token",token);
+   const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+   };
+
+   res.cookie("token", token, cookieOptions);
 
    res.status(200).json({
       message:"Logged-in Successfully",
@@ -139,7 +151,13 @@ async function googleAuthCallback(req, res) {
       }
 
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "4d" });
-      res.cookie("token", token);
+      const cookieOptions = {
+         httpOnly: true,
+         secure: process.env.NODE_ENV === "production",
+         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+      };
+
+      res.cookie("token", token, cookieOptions);
 
       const userData = JSON.stringify({
          email: user.email,
