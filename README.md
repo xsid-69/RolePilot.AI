@@ -140,10 +140,14 @@ FRONTEND_URL=http://localhost:5173
 BACKEND_URL=http://localhost:3000
 ```
 
-### Frontend (`frontend/.env`)
+### Frontend (`frontend/.env.development` & `frontend/.env.production`)
 
 ```env
-VITE_BACKEND_URL=http://localhost:3000
+# .env.development
+VITE_API_URL=http://localhost:3000
+
+# .env.production
+VITE_API_URL=https://rolepilot-backend.onrender.com
 ```
 
 ---

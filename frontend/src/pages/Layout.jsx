@@ -39,7 +39,7 @@ const Layout = () => {
 
   const fetchChats = useCallback(async () => {
       try {
-          const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/chat`, { withCredentials: true });
+          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/chat`, { withCredentials: true });
           if(res.data.success){
               setChats(res.data.chats);
           }
@@ -50,7 +50,7 @@ const Layout = () => {
 
   const fetchPersonas = useCallback(async () => {
       try {
-          const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/personas`, { withCredentials: true });
+          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/personas`, { withCredentials: true });
           if (res.data.success) {
               setPersonas(res.data.personas);
               setPersonaError(null);
@@ -99,8 +99,8 @@ const Layout = () => {
       try {
           const method = editingPersona ? 'put' : 'post';
           const endpoint = editingPersona 
-                ? `${import.meta.env.VITE_BACKEND_URL}/api/personas/${editingPersona._id}` 
-                : `${import.meta.env.VITE_BACKEND_URL}/api/personas`;
+                ? `${import.meta.env.VITE_API_URL}/api/personas/${editingPersona._id}` 
+                : `${import.meta.env.VITE_API_URL}/api/personas`;
           
           const res = await axios[method](endpoint, formData, { withCredentials: true });
 
@@ -118,7 +118,7 @@ const Layout = () => {
   const handleDeletePersona = useCallback(async (id) => {
       if (!window.confirm("Delete this persona forever?")) return;
       try {
-          const res = await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/personas/${id}`, { withCredentials: true });
+          const res = await axios.delete(`${import.meta.env.VITE_API_URL}/api/personas/${id}`, { withCredentials: true });
           if (res.data.success) {
               toast.success("Persona deleted.");
               fetchPersonas();
@@ -137,7 +137,7 @@ const Layout = () => {
       setIsLoading(true);
       setMessages([]); // Clear previous messages immediately
       try {
-          const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/chat/${id}/messages`, { withCredentials: true });
+          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/chat/${id}/messages`, { withCredentials: true });
           if (res.data.success) {
               setMessages(res.data.messages.map(msg => ({ role: msg.role === 'model' ? 'ai' : msg.role, content: msg.content })));
               
@@ -158,7 +158,7 @@ const Layout = () => {
   const handleDeleteChat = async (id) => {
       if (!window.confirm("Are you sure you want to delete this conversation and its entire history?")) return;
       try {
-          const res = await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/chat/${id}`, { withCredentials: true });
+          const res = await axios.delete(`${import.meta.env.VITE_API_URL}/api/chat/${id}`, { withCredentials: true });
           if (res.data.success) {
               toast.success("Conversation deleted.");
               fetchChats();
@@ -185,7 +185,7 @@ const Layout = () => {
   }, [selectedPersona, chatId, messages.length]);
 
   useEffect(() => {
-    const newSocket = io(import.meta.env.VITE_BACKEND_URL, {
+    const newSocket = io(import.meta.env.VITE_API_URL, {
       withCredentials: true,
     });
     socketRef.current = newSocket;
@@ -223,7 +223,7 @@ const Layout = () => {
          }
 
          try {
-            const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/chat`, { 
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/chat`, { 
                 title: content.substring(0, 20),
                 personaId: selectedPersona._id
             }, { withCredentials: true });

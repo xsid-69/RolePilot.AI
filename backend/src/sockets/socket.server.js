@@ -9,9 +9,14 @@ import { createMemory, queryMemory } from "../services/vector.service.js";
 import promptBuilderService from "../services/promptBuilder.service.js";
 
 function initSocketServer(httpServer) {
+    const allowedOrigins = [
+        process.env.FRONTEND_URL,
+        "http://localhost:5173"
+    ].filter(Boolean);
+
     const io = new Server(httpServer, {
         cors: {
-            origin: process.env.FRONTEND_URL || "http://localhost:5173",
+            origin: allowedOrigins,
             allowedHeaders: ["Content-Type", "Authorization"],
             credentials: true
         }
