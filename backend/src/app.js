@@ -11,6 +11,8 @@ import chatRoutes from "./routes/chat.routes.js"
 import personaRoutes from "./routes/persona.routes.js"
 import errorMiddleware from "./middlewares/error.middleware.js";
 import passport from "./config/passport.js";
+import session from "express-session";
+import MongoStore from "connect-mongo";
 
 const app = express();
 
@@ -28,7 +30,22 @@ const limiter = rateLimit({
 });
 app.use("/api", limiter);
 
+// Session middleware (store in MongoDB) - required for Passport sessions (OAuth flows)
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'change_this_secret',
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({ mongoUrl: process.env.MONGO_URI || process.env.DATABASE_URL }),
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    }
+}));
+
 app.use(passport.initialize());
+app.use(passport.session());
 
 const allowedOrigins = [
     process.env.FRONTEND_URL,

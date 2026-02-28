@@ -7,6 +7,18 @@ const router = express.Router();
 
 router.post("/register",registerUser);
 router.post("/login",loginUser);
+router.get("/user", (req, res) => {
+	if (req.user) {
+		res.status(200).json({ success: true, user: {
+			_id: req.user._id,
+			email: req.user.email,
+			fullName: req.user.fullName,
+			profilePic: req.user.profilePic
+		}});
+	} else {
+		res.status(200).json({ success: false, user: null });
+	}
+});
 router.put("/profile", authUser, updateProfile);
 router.put("/password", authUser, updatePassword);
 

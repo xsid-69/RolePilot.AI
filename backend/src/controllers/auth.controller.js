@@ -149,27 +149,15 @@ async function googleAuthCallback(req, res) {
       if (!user) {
          return res.redirect(`${FRONTEND_URL}/login?error=GoogleAuthFailed`);
       }
-
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "4d" });
-      const cookieOptions = {
-         httpOnly: true,
-         secure: process.env.NODE_ENV === "production",
-         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
-      };
-
-      res.cookie("token", token, cookieOptions);
-
-      const userData = JSON.stringify({
-         email: user.email,
-         fullName: user.fullName,
-         _id: user._id,
-         profilePic: user.profilePic,
-         bio: user.bio,
-         jobTitle: user.jobTitle,
-         company: user.company
+      // Use express-session + passport to establish a session
+      req.login(user, (err) => {
+         if (err) {
+            console.error("Login error after Google OAuth:", err);
+            return res.redirect(`${FRONTEND_URL}/login?error=SessionError`);
+         }
+         return res.redirect(`${FRONTEND_URL}/auth/success`);
       });
-
-      res.redirect(`${FRONTEND_URL}/auth/success?user=${encodeURIComponent(userData)}`);
+     
    } catch (error) {
       console.error("Error in google auth callback:", error);
       res.redirect(`${FRONTEND_URL}/login?error=InternalServerError`);
