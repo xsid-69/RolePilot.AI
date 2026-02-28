@@ -9,23 +9,28 @@ const AuthSuccess = () => {
     const { login } = useUser();
 
     useEffect(() => {
-        const queryParams = new URLSearchParams(location.search);
-        const userParam = queryParams.get('user');
-
-        if (userParam) {
+        const verifySession = async () => {
             try {
-                const userData = JSON.parse(decodeURIComponent(userParam));
-                login(userData);
-                toast.success("Successfully logged in with Google!");
-                navigate("/");
-            } catch (error) {
-                console.error("Error parsing user data", error);
-                toast.error("Failed to login with Google.");
-                navigate("/login");
+                const resp = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/user`, {
+                    credentials: 'include'
+                });
+                const data = await resp.json();
+                if (data && data.success && data.user) {
+                    login(data.user);
+                    toast.success("Successfully logged in with Google!");
+                    navigate("/");
+                } else {
+                    toast.error("Failed to validate Google session.");
+                    navigate("/login");
+                }
+            } catch (err) {
+                console.error('Error verifying session', err);
+                toast.error("Failed to validate Google session.");
+                navigate('/login');
             }
-        } else {
-            navigate("/login");
-        }
+        };
+
+        verifySession();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 

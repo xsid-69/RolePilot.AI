@@ -55,9 +55,15 @@ const allowedOrigins = [
 // CORS configuration supporting dynamic frontends
 app.use(cors({
     origin: function(origin, callback) {
+        // Log origin for debugging in production
+        try {
+          console.log('[CORS] Incoming request origin:', origin, 'Allowed origins:', allowedOrigins);
+        } catch (e) {}
+
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
+            console.warn('[CORS] Rejected origin:', origin);
             callback(new Error("Not allowed by CORS"));
         }
     },

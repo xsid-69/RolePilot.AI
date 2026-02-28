@@ -149,12 +149,27 @@ async function googleAuthCallback(req, res) {
       if (!user) {
          return res.redirect(`${FRONTEND_URL}/login?error=GoogleAuthFailed`);
       }
+      // Debug logging to help diagnose session/cookie issues in production
+      console.log("[GoogleCallback] Incoming callback. req.user._id:", user._id);
+      console.log("[GoogleCallback] Request headers origin:", req.headers.origin);
+      console.log("[GoogleCallback] Cookies on request:", req.headers.cookie);
+
       // Use express-session + passport to establish a session
       req.login(user, (err) => {
          if (err) {
-            console.error("Login error after Google OAuth:", err);
+            console.error("[GoogleCallback] req.login error:", err);
             return res.redirect(`${FRONTEND_URL}/login?error=SessionError`);
          }
+
+         // Log session id and session contents to verify session persistence
+         try {
+           console.log("[GoogleCallback] sessionID:", req.sessionID);
+           console.log("[GoogleCallback] session:", req.session);
+         } catch (logErr) {
+           console.warn("[GoogleCallback] could not read req.session:", logErr);
+         }
+
+         console.log("[GoogleCallback] login succeeded, redirecting to frontend auth success");
          return res.redirect(`${FRONTEND_URL}/auth/success`);
       });
      

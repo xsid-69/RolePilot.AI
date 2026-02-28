@@ -100,7 +100,7 @@ const SignUpPage = () => {
       </div>
       {/* Left column: sign-up form */}
       <section className="flex-1 flex items-center justify-center p-4 md:p-8 relative z-10 w-full overflow-y-auto custom-scrollbar">
-        <div className="w-full max-w-[440px] relative mt-10 md:mt-0">
+        <div className="w-full max-w-110 relative mt-10 md:mt-0">
           {/* Ambient Glow behind card */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-violet-600/10 blur-[100px] rounded-full pointer-events-none" />
           
