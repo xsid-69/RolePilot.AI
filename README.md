@@ -16,7 +16,7 @@ Built on a robust architecture featuring **Node.js, Express, React, and MongoDB*
 
 ## 🚀 Live Demo
 
-- **Live URL:** [https://rolepilotai-omega.vercel.app/ (Placeholder)](#)
+[**🔴 Live Link**](https://rolepilotai-omega.vercel.app/)
 
 
 ---
