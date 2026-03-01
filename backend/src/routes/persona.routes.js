@@ -10,7 +10,12 @@ import userModel from "../models/user.model.js";
 // Public route to view available roles
 router.get("/", async (req, res, next) => {
     // Optional auth: try to authorize but don't fail if no token
-    const token = req.cookies.token;
+    let token = req.cookies.token;
+    
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+        token = req.headers.authorization.split(' ')[1];
+    }
+    
     if (token) {
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
