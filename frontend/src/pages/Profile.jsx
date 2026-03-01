@@ -91,7 +91,10 @@ const Profile = () => {
             const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/auth/password`, {
                 currentPassword,
                 newPassword
-            }, { withCredentials: true });
+            }, { 
+                withCredentials: true,
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
 
             if (res.status === 200) {
                 toast.success('Password updated successfully!');

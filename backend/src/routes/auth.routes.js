@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post("/register",registerUser);
 router.post("/login",loginUser);
-router.get("/user", (req, res) => {
+router.get("/user", authUser, (req, res) => {
 	if (req.user) {
 		res.status(200).json({ success: true, user: {
 			_id: req.user._id,

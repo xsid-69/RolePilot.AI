@@ -65,7 +65,7 @@ const SignUpPage = () => {
       }, {
         withCredentials: true
       });
-      login(response.data.user);
+      login(response.data.user, response.data.token);
       toast.success("User created successfully");
       navigate("/login");
     } catch (error) {

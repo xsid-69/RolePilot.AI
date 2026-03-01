@@ -31,6 +31,7 @@ async function registerUser(req,res){
 
     res.status(201).json({
         message: " User created Successfully",
+        token, // <-- Explicitly return token
         user:{
             email:user.email,
             fullName:user.fullName,
@@ -67,6 +68,7 @@ async function loginUser(req,res){
 
    res.status(200).json({
       message:"Logged-in Successfully",
+      token, // <-- Explicitly return token for frontend to store
       user:{
          email:user.email,
          fullName:user.fullName,
@@ -149,30 +151,21 @@ async function googleAuthCallback(req, res) {
       if (!user) {
          return res.redirect(`${FRONTEND_URL}/login?error=GoogleAuthFailed`);
       }
-      // Debug logging to help diagnose session/cookie issues in production
-      console.log("[GoogleCallback] Incoming callback. req.user._id:", user._id);
-      console.log("[GoogleCallback] Request headers origin:", req.headers.origin);
-      console.log("[GoogleCallback] Cookies on request:", req.headers.cookie);
 
-      // Use express-session + passport to establish a session
-      req.login(user, (err) => {
-         if (err) {
-            console.error("[GoogleCallback] req.login error:", err);
-            return res.redirect(`${FRONTEND_URL}/login?error=SessionError`);
-         }
+      // 1. Manually create the JWT Token
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "4d" });
+      
+      // 2. Safely attach fallback cookies
+      const cookieOptions = {
+         httpOnly: true,
+         secure: process.env.NODE_ENV === "production",
+         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+      };
+      res.cookie("token", token, cookieOptions);
 
-         // Log session id and session contents to verify session persistence
-         try {
-           console.log("[GoogleCallback] sessionID:", req.sessionID);
-           console.log("[GoogleCallback] session:", req.session);
-         } catch (logErr) {
-           console.warn("[GoogleCallback] could not read req.session:", logErr);
-         }
-
-         console.log("[GoogleCallback] login succeeded, redirecting to frontend auth success");
-         return res.redirect(`${FRONTEND_URL}/auth/success`);
-      });
-     
+      // 3. Redirect to the AuthSuccess handoff page explicitly with the token
+      return res.redirect(`${FRONTEND_URL}/auth/success?token=${token}`);
+      
    } catch (error) {
       console.error("Error in google auth callback:", error);
       res.redirect(`${FRONTEND_URL}/login?error=InternalServerError`);

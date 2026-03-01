@@ -63,7 +63,7 @@ const SignInPage = () => {
       }, {
         withCredentials: true
       });
-      login(response.data.user);
+      login(response.data.user, response.data.token);
       toast.success("User logged in successfully");
       navigate("/");
     } catch (error) {

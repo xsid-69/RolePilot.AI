@@ -24,13 +24,16 @@ function initSocketServer(httpServer) {
 
     io.use(async (socket, next) => {
         const cookies = cookie.parse(socket.handshake.headers?.cookie || "");
+        
+        // Accept token from socket handshake (localStorage) or fallback to cookies
+        const token = socket.handshake.auth?.token || cookies.token;
 
-        if (!cookies.token) {
+        if (!token) {
             return next(new Error("Authentication error: No token provided"));
         }
 
         try {
-            const decoded = jwt.verify(cookies.token, process.env.JWT_SECRET);
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
             const user = await userModel.findById(decoded.id);
 
             if (!user) {
