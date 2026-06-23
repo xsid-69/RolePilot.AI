@@ -16,8 +16,8 @@ Built on a robust architecture featuring **Node.js, Express, React, and MongoDB*
 
 ## 🚀 Live Demo
 
-- **Live URL:** [https://rolepilot.ai (Placeholder)](#)
-- **GitHub Repository:** [https://github.com/yourusername/rolepilot.ai (Placeholder)](#)
+[**🔴 Live Link**](https://rolepilotai-omega.vercel.app/)
+
 
 ---
 
