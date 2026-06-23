@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useUser } from '../context/UserContextShared';
+import { staggerContainer, staggerItem, smoothTransition } from '../lib/motion';
 
 const Hero = React.memo(() => {
   const { user } = useUser();
@@ -43,31 +45,59 @@ const Hero = React.memo(() => {
   }, [user, line1Full, line2Full]);
 
   return (
-    <div className="flex flex-col items-center justify-center text-center max-w-2xl px-4 animate-in fade-in duration-500">
-      <div className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-3xl flex items-center justify-center mb-10 border border-white/10 shadow-2xl relative group p-3 md:p-4">
-          <div className="absolute inset-0 bg-violet-500/10 blur-xl rounded-full scale-150 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-          <img 
-            src="/rolepilotai.svg" 
-            alt="RolePilot AI" 
-            className="w-full h-full object-contain relative z-10 group-hover:scale-110 transition-transform duration-700"
+    <motion.div
+      variants={staggerContainer}
+      initial="initial"
+      animate="animate"
+      className="flex flex-col items-center justify-center text-center max-w-2xl px-4"
+    >
+      <motion.div
+        variants={staggerItem}
+        className="relative mb-10"
+      >
+        {/* Pulsing glow ring */}
+        <motion.div
+          animate={{
+            scale: [1, 1.3, 1],
+            opacity: [0.1, 0.25, 0.1],
+          }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute inset-0 bg-violet-500/20 blur-2xl rounded-full scale-150"
+        />
+        {/* Floating logo */}
+        <motion.div
+          animate={{ y: [0, -6, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-3xl flex items-center justify-center border border-white/10 shadow-2xl relative p-3 md:p-4"
+        >
+          <img
+            src="/rolepilotai.svg"
+            alt="RolePilot AI"
+            className="w-full h-full object-contain relative z-10"
             loading="eager"
             fetchpriority="high"
             width="80"
             height="80"
           />
-      </div>
+        </motion.div>
+      </motion.div>
 
-      <div className="space-y-4">
+      <motion.div variants={staggerItem} className="space-y-4">
         <h1 className="text-3xl md:text-5xl font-black text-white leading-tight tracking-tight">
           <span className="block mb-2">{displayedText.line1}<span className={`inline-block w-1 h-8 md:w-1.5 md:h-11 ml-2 bg-white transition-opacity ${activeLine === 1 ? 'animate-pulse opacity-100' : 'opacity-0'}`} /></span>
           <span className="block text-vibrant-gradient leading-none py-1">{displayedText.line2}<span className={`inline-block w-1 h-8 md:w-1.5 md:h-11 ml-2 bg-violet-500 transition-opacity ${activeLine === 2 ? 'animate-pulse opacity-100' : 'opacity-0'}`} /></span>
         </h1>
-        
-        <p className="text-gray-400 text-xs md:text-sm max-w-sm mx-auto font-medium leading-relaxed opacity-60 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-1000 fill-mode-both">
-          Engage with elite personas refined for professional excellence and creative depth.
-        </p>
-      </div>
-    </div>
+      </motion.div>
+
+      <motion.p
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 0.7, y: 0 }}
+        transition={{ ...smoothTransition, delay: 1.5 }}
+        className="text-gray-400 text-xs md:text-sm max-w-sm mx-auto font-medium leading-relaxed mt-4"
+      >
+        Talk to characters that keep their voice, backstory, and mood, persona after persona.
+      </motion.p>
+    </motion.div>
   );
 });
 

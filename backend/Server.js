@@ -1,4 +1,5 @@
 import "dotenv/config";
+import "./src/config/dns.config.js"; // must load before app.js (which opens a Mongo SRV connection)
 import app from "./src/app.js"
 import connectDB from "./src/db/db.js";
 import initSocketServer from "./src/sockets/socket.server.js";

@@ -50,38 +50,49 @@ function initSocketServer(httpServer) {
     io.on("connection", (socket) => {
         socket.on("ai-message", async (messagePayload) => {
             try {
-                /* message saved in db and generates vector for messages*/
-                const [storedMessage, vectors] = await Promise.all([
-                    messageModel.create({
-                        chat: messagePayload.chat,
-                        user: socket.user._id,
-                        content: messagePayload.content,
-                        role: "user"
-                    }),
-                    aiService.generateVector(messagePayload.content),
-                    ChatModel.findByIdAndUpdate(messagePayload.chat, { lastActivity: new Date() })
-                ]);
+                if (!messagePayload?.chat || !messagePayload?.content) {
+                    socket.emit("ai-error", { error: "Invalid message payload." });
+                    return;
+                }
 
-                /*query pinecone for previous messages from vector db*/
-                const memory = await queryMemory({
-                    queryVector: vectors,
-                    limit: 5,
-                    metadata: {
-                        user: socket.user._id.toString()
-                    }
+                /* Save the user message and bump chat activity. */
+                const storedMessage = await messageModel.create({
+                    chat: messagePayload.chat,
+                    user: socket.user._id,
+                    content: messagePayload.content,
+                    role: "user"
                 });
+                ChatModel.findByIdAndUpdate(messagePayload.chat, { lastActivity: new Date() }).catch((e) =>
+                    console.error("Failed to update chat activity:", e)
+                );
 
-                /*current message stored in vector db pinecone*/
-                await createMemory({
-                    vector: vectors,
-                    id: storedMessage._id.toString(),
-                    metadata: {
-                        chat: messagePayload.chat.toString(),
-                        user: socket.user._id.toString(),
-                        text: messagePayload.content
-                    }
-                });
-                
+                /* Long-term memory (vector db) is best-effort. A failure here must not
+                   prevent the user from getting an AI response. */
+                let memory = [];
+                try {
+                    const vectors = await aiService.generateVector(messagePayload.content);
+
+                    memory = await queryMemory({
+                        queryVector: vectors,
+                        limit: 5,
+                        metadata: {
+                            user: socket.user._id.toString()
+                        }
+                    });
+
+                    await createMemory({
+                        vector: vectors,
+                        id: storedMessage._id.toString(),
+                        metadata: {
+                            chat: messagePayload.chat.toString(),
+                            user: socket.user._id.toString(),
+                            text: messagePayload.content
+                        }
+                    });
+                } catch (memoryError) {
+                    console.error("Memory step failed (non-fatal):", memoryError);
+                }
+
                 /*get last 20 messages as chatHistory from db*/
                 const chatHistory = await messageModel.find({
                         chat: messagePayload.chat
@@ -126,20 +137,21 @@ function initSocketServer(httpServer) {
                     chat: messagePayload.chat
                 });
 
-                /*store response in db and generate vector for response*/
-                const [responseMessage, responseVectors] = await Promise.all([
-                    messageModel.create({
+                /* Persist the AI response. This is important, so failures here are logged
+                   but must not surface an error to the user since they already got the reply. */
+                try {
+                    const responseMessage = await messageModel.create({
                         chat: messagePayload.chat,
                         user: socket.user._id,
                         content: response,
                         role: "model"
-                    }),
-                    aiService.generateVector(response)
-                ]);
+                    });
 
-                /*store response in vector db pinecone*/
-                await Promise.all([
-                    createMemory({
+                    await ChatModel.findByIdAndUpdate(messagePayload.chat, { lastActivity: new Date() });
+
+                    /* Store response in vector db (pinecone). Best-effort: don't fail the turn. */
+                    const responseVectors = await aiService.generateVector(response);
+                    await createMemory({
                         vector: responseVectors,
                         id: responseMessage._id.toString(),
                         metadata: {
@@ -147,12 +159,24 @@ function initSocketServer(httpServer) {
                             user: socket.user._id.toString(),
                             text: response
                         }
-                    }),
-                    ChatModel.findByIdAndUpdate(messagePayload.chat, { lastActivity: new Date() })
-                ]);
+                    });
+                } catch (persistError) {
+                    console.error("Post-response persistence error (non-fatal):", persistError);
+                }
             } catch (error) {
                 console.error("AI Message Error:", error);
-                socket.emit("ai-error", { error: error?.message || "Something went wrong" });
+
+                const status = error?.status ?? error?.code ?? error?.response?.status;
+                let friendlyMessage = "Something went wrong while generating a response. Please try again.";
+
+                if (Number(status) === 503 || Number(status) === 429) {
+                    friendlyMessage = "The AI is experiencing high demand right now. Please wait a moment and try again.";
+                }
+
+                socket.emit("ai-error", {
+                    error: friendlyMessage,
+                    chat: messagePayload?.chat
+                });
             }
         });
     });

@@ -5,37 +5,33 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContextShared';
 import { toast } from 'react-toastify';
+import { motion } from 'framer-motion';
+import { staggerContainer, staggerItem, slideInFromRight, springTransition, smoothTransition } from '../lib/motion';
 
 const GoogleIcon = () => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       className="h-5 w-5"
       viewBox="0 0 48 48">
-        <path
-          fill="#FFC107"
-          d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s12-5.373 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-2.641-.21-5.236-.611-7.743z" />
-        <path
-          fill="#FF3D00"
-          d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z" />
-        <path
-          fill="#4CAF50"
-          d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" />
-        <path
-          fill="#1976D2"
-          d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C42.022 35.026 44 30.038 44 24c0-2.641-.21-5.236-.611-7.743z" />
+        <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s12-5.373 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-2.641-.21-5.236-.611-7.743z" />
+        <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z" />
+        <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" />
+        <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C42.022 35.026 44 30.038 44 24c0-2.641-.21-5.236-.611-7.743z" />
     </svg>
 );
 
-const GlassInputWrapper = ({ children}) => (
-  <div
-    className="rounded-2xl border border-border bg-foreground/5 backdrop-blur-sm transition-colors focus-within:border-violet-400/70 focus-within:bg-violet-500/10">
+const GlassInputWrapper = ({ children }) => (
+  <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm transition-all focus-within:border-violet-400/70 focus-within:bg-violet-500/5 focus-within:shadow-[0_0_20px_rgba(217,164,63,0.12)]">
     {children}
   </div>
 );
 
-const TestimonialCard = ({testimonial, delay}) => (
-  <div
-    className={`animate-testimonial ${delay} flex items-start gap-4 rounded-4xl glass-panel border border-white/5 p-5 w-72 shadow-2xl relative overflow-hidden group hover:scale-[1.02] transition-transform duration-500 bg-[#0c0c0e]/40`}>
+const TestimonialCard = ({testimonial}) => (
+  <motion.div
+    whileHover={{ y: -4, scale: 1.02 }}
+    transition={springTransition}
+    className="flex items-start gap-4 rounded-3xl glass-panel border border-white/5 p-5 w-72 shadow-2xl relative overflow-hidden group bg-[#0c0c0e]/40"
+  >
     <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
     <img
       src={testimonial.avatarSrc}
@@ -46,7 +42,7 @@ const TestimonialCard = ({testimonial, delay}) => (
       <p className="text-violet-400 text-[10px] font-black uppercase tracking-widest mt-0.5">{testimonial.handle}</p>
       <p className="mt-2.5 text-gray-300 font-medium text-xs leading-relaxed italic">"{testimonial.text}"</p>
     </div>
-  </div>
+  </motion.div>
 );
 
 const SignUpPage = () => {
@@ -73,18 +69,18 @@ const SignUpPage = () => {
     }
   };
 
-  const heroImageSrc = "https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?q=80&w=2532&auto=format&fit=crop"; 
+  const heroImageSrc = "https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?q=80&w=2532&auto=format&fit=crop";
   const testimonials = [
       {
-          name: "Sarah Connors",
-          handle: "@s_connor",
-          text: "Joining was the best decision for my startup.",
+          name: "Sara Okafor",
+          handle: "Founder",
+          text: "I use it to practice investor pitches with a skeptical persona.",
           avatarSrc: "https://randomuser.me/api/portraits/women/68.jpg"
       },
        {
-          name: "Mike Ross",
-          handle: "@m_ross",
-          text: "Incredible features and stunning design.",
+          name: "Daniel Cho",
+          handle: "Game writer",
+          text: "Each character holds their backstory, so dialogue stays in canon.",
           avatarSrc: "https://randomuser.me/api/portraits/men/86.jpg"
       }
   ];
@@ -92,35 +88,38 @@ const SignUpPage = () => {
   return (
     <div className="min-h-screen flex flex-col md:flex-row font-sans w-full bg-[#0c0c0e] text-foreground relative overflow-hidden">
       {/* Background Decor */}
-      <div className="absolute inset-0 z-0 pointer-events-none bg-[#0c0c0e]">
+      <div className="absolute inset-0 z-0 pointer-events-none bg-[#0c0c0e] mesh-gradient-bg">
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-size-[24px_24px] pointer-events-none"></div>
-          {/* Glossy radial lighting setup */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_center,rgba(255,255,255,0.06)_0%,transparent_50%,rgba(0,0,0,0.6)_100%)]" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.02)_0%,transparent_100%)]" />
       </div>
+
       {/* Left column: sign-up form */}
       <section className="flex-1 flex items-center justify-center p-4 md:p-8 relative z-10 w-full overflow-y-auto custom-scrollbar">
         <div className="w-full max-w-110 relative mt-10 md:mt-0">
-          {/* Ambient Glow behind card */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-violet-600/10 blur-[100px] rounded-full pointer-events-none" />
-          
-          <div className="flex flex-col gap-6 premium-card p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden border border-white/5 backdrop-blur-3xl">
-            {/* Soft inner highlight */}
+
+          <motion.div
+            variants={staggerContainer}
+            initial="initial"
+            animate="animate"
+            className="flex flex-col gap-6 premium-card p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden border border-white/5 backdrop-blur-3xl"
+          >
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-24 bg-white/5 blur-2xl pointer-events-none rounded-full" />
-            
+
             <div className="relative z-10">
-              <div className="mb-0 overflow-hidden">
+              <motion.div variants={staggerItem} className="mb-0 overflow-hidden">
                 <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-6 border border-white/10 shadow-lg mt-10 md:mt-0">
                    <img src="/rolepilotai.svg" alt="Logo" className="w-8 h-8 opacity-90" />
                 </div>
-                <h1 className="animate-element animate-delay-100 text-white text-3xl md:text-4xl font-black tracking-tight leading-tight">
+                <h1 className="text-white text-3xl md:text-4xl font-black tracking-tight leading-tight">
                   Join RolePilot
                 </h1>
-                <p className="animate-element animate-delay-200 text-gray-400 mt-2 text-sm font-medium">Create an account and start building your AI team.</p>
-              </div>
+                <p className="text-gray-400 mt-2 text-sm font-medium">Create an account and start building your AI team.</p>
+              </motion.div>
 
             <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
-              <div className="grid grid-cols-2 gap-4 animate-element animate-delay-250 mt-6">
+              <motion.div variants={staggerItem} className="grid grid-cols-2 gap-4 mt-6">
                 <div>
                   <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 block ml-1">First Name</label>
                   <GlassInputWrapper>
@@ -147,9 +146,9 @@ const SignUpPage = () => {
                     <p className="text-red-400 text-[10px] mt-1 ml-1 font-medium">{errors.lastName.message}</p>
                   )}
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="animate-element animate-delay-300">
+              <motion.div variants={staggerItem}>
                 <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 block ml-1">Email Address</label>
                 <GlassInputWrapper>
                   <input
@@ -161,9 +160,9 @@ const SignUpPage = () => {
                 {errors.email && (
                   <p className="text-red-400 text-[10px] mt-1 ml-1 font-medium">{errors.email.message}</p>
                 )}
-              </div>
+              </motion.div>
 
-              <div className="animate-element animate-delay-400">
+              <motion.div variants={staggerItem}>
                 <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 block ml-1">Password</label>
                 <GlassInputWrapper>
                   <div className="relative">
@@ -176,60 +175,83 @@ const SignUpPage = () => {
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute inset-y-0 right-3 flex items-center cursor-pointer active:scale-90 transition-transform duration-200">
-                      {showPassword ? <EyeOff
-                        className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors" /> : <Eye
-                        className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors" />}
+                      {showPassword ? <EyeOff className="w-5 h-5 text-gray-500 hover:text-white transition-colors" /> : <Eye className="w-5 h-5 text-gray-500 hover:text-white transition-colors" />}
                     </button>
                   </div>
                 </GlassInputWrapper>
                 {errors.password && (
                   <p className="text-red-400 text-[10px] mt-1 ml-1 font-medium">{errors.password.message}</p>
                 )}
-              </div>
+              </motion.div>
 
-              <button
-                type="submit"
-                className="animate-element animate-delay-600 w-full rounded-2xl bg-violet-600 text-white py-4 font-black hover:bg-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(124,58,237,0.3)] hover:shadow-[0_0_30px_rgba(124,58,237,0.5)] cursor-pointer active:scale-95 text-xs uppercase tracking-[0.2em] mt-2 pb-3 pt-3">
-                Create Account
-              </button>
+              <motion.div variants={staggerItem}>
+                <motion.button
+                  type="submit"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="w-full rounded-2xl bg-violet-500 text-black py-4 font-bold hover:bg-violet-400 transition-colors cursor-pointer text-xs uppercase tracking-[0.18em] mt-2"
+                >
+                  Create account
+                </motion.button>
+              </motion.div>
             </form>
 
-            <div className="animate-element animate-delay-700 relative flex items-center justify-center my-1.5">
+            <motion.div variants={staggerItem} className="relative flex items-center justify-center my-1.5">
               <span className="w-full border-t border-white/5"></span>
               <span className="px-4 text-[10px] uppercase font-bold tracking-widest text-gray-500 bg-transparent absolute backdrop-blur-md pb-0.5">Or Continue With</span>
-            </div>
+            </motion.div>
 
-            <a href={`${import.meta.env.VITE_API_URL}/api/auth/google`} className="animate-element animate-delay-800 w-full flex items-center justify-center gap-3 border border-white/5 rounded-2xl py-3 bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer active:scale-95 text-white shadow-lg">
-                <GoogleIcon />
-                <span className="text-xs font-bold uppercase tracking-wider">Google</span>
-            </a>
+            <motion.div variants={staggerItem}>
+              <motion.a
+                href={`${import.meta.env.VITE_API_URL}/api/auth/google`}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="w-full flex items-center justify-center gap-3 border border-white/5 rounded-2xl py-3 bg-white/5 hover:bg-white/10 transition-colors cursor-pointer text-white shadow-lg"
+              >
+                  <GoogleIcon />
+                  <span className="text-xs font-bold uppercase tracking-wider">Google</span>
+              </motion.a>
+            </motion.div>
 
-            <p className="animate-element animate-delay-900 text-center text-xs text-gray-500 font-medium mt-1">
+            <motion.p variants={staggerItem} className="text-center text-xs text-gray-500 font-medium mt-1">
               Already have an account? <a href="/login" className="text-violet-400 hover:text-violet-300 hover:underline transition-colors font-bold ml-1">Sign In</a>
-            </p>
+            </motion.p>
 
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
+
       {/* Right column: hero image + testimonials */}
       {heroImageSrc && (
-        <section className="hidden md:block flex-1 relative p-6 bg-transparent z-10">
+        <motion.section
+          variants={slideInFromRight}
+          initial="initial"
+          animate="animate"
+          transition={{ ...smoothTransition, delay: 0.3 }}
+          className="hidden md:block flex-1 relative p-6 bg-transparent z-10"
+        >
            <div
-            className="animate-slide-right animate-delay-300 absolute inset-6 rounded-[3rem] bg-cover bg-center border border-white/5 overflow-hidden shadow-2xl"
+            className="absolute inset-6 rounded-[3rem] bg-cover bg-center border border-white/5 overflow-hidden shadow-2xl"
             style={{ backgroundImage: `url(${heroImageSrc})` }}>
                 <div className="absolute inset-0 bg-linear-to-t from-[#0c0c0e] via-[#0c0c0e]/40 to-transparent mix-blend-multiply" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(124,58,237,0.2)_0%,transparent_60%)] mix-blend-screen" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(217,164,63,0.18)_0%,transparent_60%)] mix-blend-screen" />
                 <div className="absolute inset-0 bg-black/10 backdrop-blur-[2px]" />
             </div>
-           
-          <div
-            className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-6 px-8 w-full justify-center z-20">
+
+          <motion.div
+            variants={staggerContainer}
+            initial="initial"
+            animate="animate"
+            className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-6 px-8 w-full justify-center z-20"
+          >
             {testimonials.map((t, i) => (
-                 <div key={i} className={i > 0 ? "hidden xl:block" : ""}><TestimonialCard testimonial={t} delay={`delay-${(i+5)*100}`} /></div>
+                 <motion.div key={i} variants={staggerItem} className={i > 0 ? "hidden xl:block" : ""}>
+                   <TestimonialCard testimonial={t} />
+                 </motion.div>
             ))}
-          </div>
-        </section>
+          </motion.div>
+        </motion.section>
       )}
     </div>
   );

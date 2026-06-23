@@ -5,12 +5,13 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Image as ImageIcon, Sparkles, Loader2, Lock, Eye, EyeOff } from 'lucide-react';
 import Header from '../components/Header';
+import { motion } from 'framer-motion';
+import { staggerContainer, staggerItem, springTransition, smoothTransition } from '../lib/motion';
 
 const Profile = () => {
     const { user, login } = useUser();
     const navigate = useNavigate();
-    
-    // Form state
+
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [profilePic, setProfilePic] = useState('');
@@ -19,7 +20,6 @@ const Profile = () => {
     const [company, setCompany] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    // Password state
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -67,7 +67,6 @@ const Profile = () => {
 
             if (res.status === 200) {
                 toast.success('Profile updated successfully!');
-                // Update local context
                 login(res.data.user);
             }
         } catch (error) {
@@ -91,7 +90,7 @@ const Profile = () => {
             const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/auth/password`, {
                 currentPassword,
                 newPassword
-            }, { 
+            }, {
                 withCredentials: true,
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
@@ -112,10 +111,9 @@ const Profile = () => {
     if (!user) return null;
 
     return (
-        <div className="h-screen bg-[#0c0c0e] text-white font-sans overflow-hidden flex flex-col selection:bg-white/30">
+        <div className="h-screen bg-[#0c0c0e] text-white font-sans overflow-hidden flex flex-col selection:bg-violet-500/30">
             {/* Background effects */}
-            <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-[#0c0c0e]">
-                {/* Glossy radial lighting setup */}
+            <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-[#0c0c0e] mesh-gradient-bg">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_center,rgba(255,255,255,0.06)_0%,transparent_50%,rgba(0,0,0,0.6)_100%)]" />
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.02)_0%,transparent_100%)]" />
             </div>
@@ -123,22 +121,36 @@ const Profile = () => {
             <Header onNewChat={() => navigate('/')} />
 
             <div className="relative z-10 flex-1 overflow-y-auto custom-scrollbar pt-28 pb-10 px-6">
-                <div className="max-w-2xl mx-auto">
-                    <button 
+                <motion.div
+                  variants={staggerContainer}
+                  initial="initial"
+                  animate="animate"
+                  className="max-w-2xl mx-auto"
+                >
+                    <motion.button
+                        variants={staggerItem}
+                        whileHover={{ x: -4 }}
                         onClick={() => navigate('/')}
                         className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-8 group"
                     >
                         <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
                         <span className="text-sm font-semibold tracking-wide">Back to Chat</span>
-                    </button>
+                    </motion.button>
 
-                    <div className="premium-card rounded-3xl p-8 backdrop-blur-xl border border-white/10 bg-white/5 shadow-2xl relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-blue-500 via-violet-500 to-rose-500 opacity-50" />
-                        
+                    <motion.div
+                      variants={staggerItem}
+                      className="premium-card rounded-3xl p-8 backdrop-blur-xl border border-white/10 bg-white/5 shadow-2xl relative overflow-hidden"
+                    >
+                        <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-violet-500/40 to-transparent" />
+
                         <div className="flex items-center gap-4 mb-8">
-                            <div className="p-3 bg-blue-500/10 rounded-2xl border border-blue-500/20">
-                                <User className="w-6 h-6 text-blue-400" />
-                            </div>
+                            <motion.div
+                              whileHover={{ scale: 1.05, rotate: 3 }}
+                              transition={springTransition}
+                              className="p-3 bg-violet-500/10 rounded-2xl border border-violet-500/20"
+                            >
+                                <User className="w-6 h-6 text-violet-400" />
+                            </motion.div>
                             <div>
                                 <h1 className="text-2xl font-bold">Your Profile</h1>
                                 <p className="text-sm text-gray-400">Manage your personal information and avatar</p>
@@ -149,7 +161,11 @@ const Profile = () => {
                             <div className="flex flex-col items-center sm:flex-row sm:items-start gap-8">
                                 {/* Profile Picture Section */}
                                 <div className="flex flex-col items-center gap-4">
-                                    <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-white/10 bg-[#0a0a0f] shadow-xl group">
+                                    <motion.div
+                                      whileHover={{ scale: 1.05 }}
+                                      transition={springTransition}
+                                      className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-white/10 bg-[#0a0a0f] shadow-xl group"
+                                    >
                                         {profilePic ? (
                                             <img src={profilePic} alt="Profile" className="w-full h-full object-cover" />
                                         ) : (
@@ -160,14 +176,14 @@ const Profile = () => {
                                         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer">
                                             <ImageIcon size={24} className="text-white mb-1" />
                                             <span className="text-[10px] font-bold uppercase tracking-wider text-white">Change</span>
-                                            <input 
-                                                type="file" 
-                                                accept="image/*" 
+                                            <input
+                                                type="file"
+                                                accept="image/*"
                                                 onChange={handleImageUpload}
                                                 className="absolute inset-0 opacity-0 cursor-pointer"
                                             />
                                         </div>
-                                    </div>
+                                    </motion.div>
                                     <div className="text-xs text-gray-500 font-medium">Click image to upload</div>
                                 </div>
 
@@ -175,29 +191,29 @@ const Profile = () => {
                                 <div className="flex-1 space-y-5 w-full">
                                     <div>
                                         <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">First Name</label>
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             value={firstName}
                                             onChange={(e) => setFirstName(e.target.value)}
                                             required
-                                            className="w-full bg-[#030712]/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-gray-600"
+                                            className="w-full bg-[#030712]/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 transition-all placeholder:text-gray-600"
                                             placeholder="John"
                                         />
                                     </div>
                                     <div>
                                         <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Last Name</label>
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             value={lastName}
                                             onChange={(e) => setLastName(e.target.value)}
-                                            className="w-full bg-[#030712]/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-gray-600"
+                                            className="w-full bg-[#030712]/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 transition-all placeholder:text-gray-600"
                                             placeholder="Doe"
                                         />
                                     </div>
                                     <div>
                                         <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Email <span className="normal-case tracking-normal font-normal text-gray-600">(Read Only)</span></label>
-                                        <input 
-                                            type="email" 
+                                        <input
+                                            type="email"
                                             value={user.email}
                                             disabled
                                             className="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-sm text-gray-500 cursor-not-allowed"
@@ -205,31 +221,31 @@ const Profile = () => {
                                     </div>
                                     <div>
                                         <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Bio</label>
-                                        <textarea 
+                                        <textarea
                                             value={bio}
                                             onChange={(e) => setBio(e.target.value)}
-                                            className="w-full bg-[#030712]/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-gray-600 resize-none h-24 custom-scrollbar"
+                                            className="w-full bg-[#030712]/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 transition-all placeholder:text-gray-600 resize-none h-24 custom-scrollbar"
                                             placeholder="Tell us a bit about yourself..."
                                         />
                                     </div>
                                     <div className="flex gap-4">
                                         <div className="flex-1">
                                             <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Job Title</label>
-                                            <input 
-                                                type="text" 
+                                            <input
+                                                type="text"
                                                 value={jobTitle}
                                                 onChange={(e) => setJobTitle(e.target.value)}
-                                                className="w-full bg-[#030712]/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-gray-600"
+                                                className="w-full bg-[#030712]/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 transition-all placeholder:text-gray-600"
                                                 placeholder="e.g. Software Engineer"
                                             />
                                         </div>
                                         <div className="flex-1">
                                             <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Company</label>
-                                            <input 
-                                                type="text" 
+                                            <input
+                                                type="text"
                                                 value={company}
                                                 onChange={(e) => setCompany(e.target.value)}
-                                                className="w-full bg-[#030712]/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-gray-600"
+                                                className="w-full bg-[#030712]/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 transition-all placeholder:text-gray-600"
                                                 placeholder="e.g. Acme Inc"
                                             />
                                         </div>
@@ -238,10 +254,12 @@ const Profile = () => {
                             </div>
 
                             <div className="pt-6 border-t border-white/10 flex justify-end">
-                                <button 
-                                    type="submit" 
+                                <motion.button
+                                    type="submit"
                                     disabled={isLoading}
-                                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-sm transition-all focus:ring-2 focus:ring-blue-500/50 active:scale-95 disabled:opacity-70 disabled:pointer-events-none shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_25px_rgba(37,99,235,0.5)]"
+                                    whileHover={{ scale: 1.03 }}
+                                    whileTap={{ scale: 0.97 }}
+                                    className="flex items-center gap-2 px-6 py-3 bg-violet-500 hover:bg-violet-400 text-black rounded-xl font-bold text-sm transition-colors focus:ring-2 focus:ring-violet-500/50 disabled:opacity-70 disabled:pointer-events-none"
                                 >
                                     {isLoading ? (
                                         <>
@@ -254,18 +272,25 @@ const Profile = () => {
                                             <span>Save Changes</span>
                                         </>
                                     )}
-                                </button>
+                                </motion.button>
                             </div>
                         </form>
-                    </div>
+                    </motion.div>
 
-                    <div className="premium-card rounded-3xl p-8 backdrop-blur-xl border border-white/10 bg-white/5 shadow-2xl relative overflow-hidden mt-8">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-rose-500 via-orange-500 to-amber-500 opacity-50" />
-                        
+                    <motion.div
+                      variants={staggerItem}
+                      className="premium-card rounded-3xl p-8 backdrop-blur-xl border border-white/10 bg-white/5 shadow-2xl relative overflow-hidden mt-8"
+                    >
+                        <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-rose-500/40 to-transparent" />
+
                         <div className="flex items-center gap-4 mb-8">
-                            <div className="p-3 bg-rose-500/10 rounded-2xl border border-rose-500/20">
+                            <motion.div
+                              whileHover={{ scale: 1.05, rotate: -3 }}
+                              transition={springTransition}
+                              className="p-3 bg-rose-500/10 rounded-2xl border border-rose-500/20"
+                            >
                                 <Lock className="w-6 h-6 text-rose-400" />
-                            </div>
+                            </motion.div>
                             <div>
                                 <h2 className="text-xl font-bold">Security</h2>
                                 <p className="text-sm text-gray-400">Update your password to keep your account secure</p>
@@ -276,15 +301,15 @@ const Profile = () => {
                             <div>
                                 <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Current Password</label>
                                 <div className="relative">
-                                    <input 
+                                    <input
                                         type={showCurrentPassword ? "text" : "password"}
                                         value={currentPassword}
                                         onChange={(e) => setCurrentPassword(e.target.value)}
                                         required
-                                        className="w-full bg-[#030712]/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all placeholder:text-gray-600"
+                                        className="w-full bg-[#030712]/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/30 transition-all placeholder:text-gray-600"
                                         placeholder="••••••••"
                                     />
-                                    <button 
+                                    <button
                                         type="button"
                                         onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                                         className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
@@ -297,15 +322,15 @@ const Profile = () => {
                                 <div className="flex-1">
                                     <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">New Password</label>
                                     <div className="relative">
-                                        <input 
+                                        <input
                                             type={showNewPassword ? "text" : "password"}
                                             value={newPassword}
                                             onChange={(e) => setNewPassword(e.target.value)}
                                             required
-                                            className="w-full bg-[#030712]/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all placeholder:text-gray-600"
+                                            className="w-full bg-[#030712]/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/30 transition-all placeholder:text-gray-600"
                                             placeholder="••••••••"
                                         />
-                                        <button 
+                                        <button
                                             type="button"
                                             onClick={() => setShowNewPassword(!showNewPassword)}
                                             className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
@@ -316,21 +341,23 @@ const Profile = () => {
                                 </div>
                                 <div className="flex-1">
                                     <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Confirm New Password</label>
-                                    <input 
+                                    <input
                                         type={showNewPassword ? "text" : "password"}
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                         required
-                                        className="w-full bg-[#030712]/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all placeholder:text-gray-600"
+                                        className="w-full bg-[#030712]/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/30 transition-all placeholder:text-gray-600"
                                         placeholder="••••••••"
                                     />
                                 </div>
                             </div>
                             <div className="pt-6 border-t border-white/10 flex justify-end">
-                                <button 
-                                    type="submit" 
+                                <motion.button
+                                    type="submit"
                                     disabled={isPasswordLoading || !currentPassword || !newPassword || !confirmPassword}
-                                    className="flex items-center gap-2 px-6 py-3 bg-rose-600 hover:bg-rose-500 text-white rounded-xl font-bold text-sm transition-all focus:ring-2 focus:ring-rose-500/50 active:scale-95 disabled:opacity-70 disabled:pointer-events-none shadow-[0_0_20px_rgba(225,29,72,0.3)] hover:shadow-[0_0_25px_rgba(225,29,72,0.5)]"
+                                    whileHover={{ scale: 1.03, boxShadow: "0 0 25px rgba(225,29,72,0.4)" }}
+                                    whileTap={{ scale: 0.97 }}
+                                    className="flex items-center gap-2 px-6 py-3 bg-rose-600 hover:bg-rose-500 text-white rounded-xl font-bold text-sm transition-colors focus:ring-2 focus:ring-rose-500/50 disabled:opacity-70 disabled:pointer-events-none shadow-[0_0_20px_rgba(225,29,72,0.3)]"
                                 >
                                     {isPasswordLoading ? (
                                         <>
@@ -343,11 +370,11 @@ const Profile = () => {
                                             <span>Update Password</span>
                                         </>
                                     )}
-                                </button>
+                                </motion.button>
                             </div>
                         </form>
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
             </div>
         </div>
     );

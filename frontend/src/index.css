@@ -4,6 +4,34 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Accent remap: the project was built on the generic AI-purple ramp.
+ * We override violet/purple/indigo at the token level so every existing
+ * utility (text-violet-400, bg-violet-600, from-violet-500, etc.) picks up
+ * a single considered warm-amber accent without touching components.
+ * One accent, locked across the whole app.
+ */
+@theme {
+  --color-violet-100: #f7ecd2;
+  --color-violet-200: #f6e0b0;
+  --color-violet-300: #f0cd87;
+  --color-violet-400: #e6b455;
+  --color-violet-500: #d99a36;
+  --color-violet-600: #c2842a;
+  --color-violet-700: #9c6a22;
+
+  --color-purple-200: #f6e0b0;
+  --color-purple-100: #f7ecd2;
+  --color-purple-300: #f0cd87;
+  --color-purple-400: #e6b455;
+  --color-purple-500: #d99a36;
+  --color-purple-600: #c2842a;
+  --color-purple-700: #9c6a22;
+
+  --color-indigo-500: #c2842a;
+  --color-indigo-600: #9c6a22;
+}
+
 :root {
   font-family:
     "Outfit",
@@ -15,19 +43,18 @@
   font-weight: 400;
 
   color-scheme: dark;
-  --background: #0c0c0e; /* Glossy Obsidian Base */
+  --background: #0c0c0e;
   --foreground: #ffffff;
   --radius: 1.5rem;
 
-  /* Glossy Aesthetic Palette */
   --accent-primary: #ffffff;
-  --accent-secondary: #9333ea; /* Modern Violet Sheen */
-  --accent-tertiary: #ffffff;
+  --accent-secondary: #d99a36;
+  --accent-tertiary: #f0cd87;
   --surface-low: #08080a;
   --surface-mid: #121216;
   --surface-high: #1c1c20;
   --border-subtle: rgba(255, 255, 255, 0.03);
-  --border-active: rgba(255, 255, 255, 0.12); /* Glossy edge */
+  --border-active: rgba(255, 255, 255, 0.12);
   --glass-bg: rgba(18, 18, 22, 0.65);
 }
 
@@ -47,9 +74,9 @@ body {
   overflow-x: hidden;
 }
 
-/* Custom Scrollbar - Slim & Minimal */
+/* Custom Scrollbar - Ultra Slim */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -57,15 +84,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(217, 164, 63, 0.14);
   border-radius: 100px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.15);
-  background-clip: padding-box;
+  background: rgba(217, 164, 63, 0.3);
 }
 
 @theme inline {
@@ -107,6 +131,84 @@ body {
       border-radius: 30% 60% 70% 30% / 50% 60% 30% 60%;
     }
   }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes gradient-shift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  @keyframes grain {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    10% {
+      transform: translate(-1%, -1%);
+    }
+    20% {
+      transform: translate(1%, 0%);
+    }
+    30% {
+      transform: translate(-0.5%, 1%);
+    }
+    40% {
+      transform: translate(1%, -0.5%);
+    }
+    50% {
+      transform: translate(-1%, 1%);
+    }
+    60% {
+      transform: translate(0.5%, -1%);
+    }
+    70% {
+      transform: translate(-1%, 0.5%);
+    }
+    80% {
+      transform: translate(1%, 1%);
+    }
+    90% {
+      transform: translate(-0.5%, -0.5%);
+    }
+  }
+
+  @keyframes mesh-shift {
+    0% {
+      background-position: 0% 0%, 100% 100%, 50% 50%;
+    }
+    33% {
+      background-position: 50% 100%, 0% 50%, 100% 0%;
+    }
+    66% {
+      background-position: 100% 50%, 50% 0%, 0% 100%;
+    }
+    100% {
+      background-position: 0% 0%, 100% 100%, 50% 50%;
+    }
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(217, 164, 63, 0.18);
+    }
+    50% {
+      box-shadow: 0 0 35px rgba(217, 164, 63, 0.34);
+    }
+  }
 }
 
 @layer base {
@@ -122,22 +224,45 @@ body {
   }
 }
 
+/* Grain Overlay */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.02;
+  animation: grain 8s steps(10) infinite;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* Animated Mesh Gradient Background */
+.mesh-gradient-bg {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(217, 164, 63, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(240, 205, 135, 0.035) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(217, 164, 63, 0.025) 0%, transparent 50%);
+  background-size: 200% 200%, 200% 200%, 200% 200%;
+  animation: mesh-shift 20s ease-in-out infinite;
+}
+
 /* Glossy Premium Cards */
 .premium-card {
   background: linear-gradient(
     135deg,
     rgba(28, 28, 34, 0.5),
+    rgba(217, 164, 63, 0.03) 50%,
     rgba(12, 12, 14, 0.8)
   );
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow:
     0 20px 50px -10px rgba(0, 0, 0, 0.7),
-    inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    inset 0 1px 1px rgba(255, 255, 255, 0.06);
   position: relative;
   overflow: hidden;
   transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  will-change: transform;
 }
 
 .premium-card::before {
@@ -171,7 +296,7 @@ body {
   bottom: 0;
   background: radial-gradient(
     600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    rgba(255, 255, 255, 0.03),
+    rgba(217, 164, 63, 0.05),
     transparent 40%
   );
   pointer-events: none;
@@ -179,19 +304,32 @@ body {
 
 .glass-panel {
   background: var(--glass-bg);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow:
     0 20px 60px -15px rgba(0, 0, 0, 0.6),
-    inset 0 1px 1px rgba(255, 255, 255, 0.08);
+    inset 0 1px 1px rgba(255, 255, 255, 0.08),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
+.glass-panel:hover {
+  border-color: rgba(217, 164, 63, 0.16);
+  box-shadow:
+    0 20px 60px -15px rgba(0, 0, 0, 0.6),
+    inset 0 1px 1px rgba(255, 255, 255, 0.08),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(217, 164, 63, 0.06);
+}
+
+/*
+ * Gradient text (background-clip:text) is a tell. The wordmark and hero
+ * line resolve to a solid warm off-white for a cleaner, intentional look.
+ */
 .text-vibrant-gradient {
-  background: linear-gradient(135deg, #fff 20%, var(--accent-secondary) 150%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #f4efe6;
+  -webkit-text-fill-color: initial;
 }
 
 .accent-glow {
@@ -202,6 +340,31 @@ body {
   z-index: 0;
   will-change: transform, opacity;
   animation: pulse-slow 12s infinite ease-in-out;
+}
+
+/* Loading Shimmer */
+.loading-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(217, 164, 63, 0.07) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s infinite;
+}
+
+/* Animated Gradient Bar */
+.animated-gradient-bar {
+  background-size: 200% 100%;
+  animation: gradient-shift 4s ease-in-out infinite;
 }
 
 /* Bento Grid System */
@@ -219,8 +382,8 @@ body {
 
 /* Custom Selection */
 ::selection {
-  background: var(--accent-primary);
-  color: white;
+  background: rgba(217, 164, 63, 0.28);
+  color: #fff;
 }
 
 /* Toastify Professional Polish */
@@ -229,20 +392,21 @@ body {
   color: white !important;
   border: 1px solid var(--border-active) !important;
   border-radius: var(--radius-lg) !important;
-  backdrop-filter: blur(12px) !important;
+  backdrop-filter: blur(16px) !important;
   font-family: inherit !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
 }
 
 .Toastify__toast-body {
-  font-size: 0.875rem !important;
+  font-size: 0.8rem !important;
   font-weight: 500 !important;
+  letter-spacing: 0.01em !important;
 }
 
 .Toastify__progress-bar {
   background: linear-gradient(
     to right,
-    var(--accent-primary),
-    var(--accent-secondary)
+    var(--accent-secondary),
+    rgba(217, 164, 63, 0.6)
   ) !important;
 }

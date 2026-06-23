@@ -20,4 +20,17 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    chunkSizeWarningLimit: 800,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          "motion-vendor": ["framer-motion"],
+          "markdown-vendor": ["react-markdown", "remark-gfm", "react-syntax-highlighter"],
+          "socket-vendor": ["socket.io-client", "axios"],
+        },
+      },
+    },
+  },
 })
